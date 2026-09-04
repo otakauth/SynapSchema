@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>古代ギリシャ知識図鑑</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#0b0f1a}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState}=React;
+
+const categories=[
+{id:"polis",name:"ポリス"},
+{id:"war",name:"戦争"},
+{id:"philo",name:"哲学"},
+{id:"mac",name:"マケドニア"},
+{id:"hel",name:"ヘレニズム"}
+];
+
+const concepts=[
+{id:"athens",cat:"polis",title:"アテネ",headline:"民主政と海軍で栄えた都市国家",
+summary:"市民参加の政治と海軍力で繁栄した。",
+related:["persia","pelop","socrates"]},
+{id:"sparta",cat:"polis",title:"スパルタ",headline:"最強の陸軍国家",
+summary:"幼少期から軍事訓練を受ける社会。",
+related:["persia","pelop"]},
+{id:"persia",cat:"war",title:"ペルシア戦争",headline:"ギリシャ連合vs超大国",
+summary:"ポリスが協力して侵略を防いだ。",
+related:["athens","sparta","pelop"]},
+{id:"pelop",cat:"war",title:"ペロポネソス戦争",headline:"アテネとスパルタの内戦",
+summary:"勝者なき戦争となった。",
+related:["athens","sparta","alex"]},
+{id:"socrates",cat:"philo",title:"ソクラテス",headline:"問い続けた哲学者",
+summary:"対話によって真理を探究。",
+related:["plato"]},
+{id:"plato",cat:"philo",title:"プラトン",headline:"アカデメイア創設",
+summary:"ソクラテスの弟子。",
+related:["socrates","aris"]},
+{id:"aris",cat:"philo",title:"アリストテレス",headline:"万学の祖",
+summary:"プラトンの弟子でアレクサンドロスの師。",
+related:["plato","alex"]},
+{id:"alex",cat:"mac",title:"アレクサンドロス大王",headline:"世界帝国を築いた征服者",
+summary:"ギリシャからインドまで征服。",
+related:["aris","hellen"]},
+{id:"hellen",cat:"hel",title:"ヘレニズム文化",headline:"文化融合の時代",
+summary:"ギリシャ文化とオリエント文化が融合。",
+related:["alex","rome"]},
+{id:"rome",cat:"hel",title:"ギリシャからローマへ",headline:"文化は受け継がれた",
+summary:"ローマはギリシャ文化を継承した。",
+related:["hellen"]}
+];
+
+function Figure({id}){
+const box="rounded-xl p-6 bg-white/5 ring-1 ring-white/10 text-center";
+if(id==="athens") return <div className={box}>市民 → 民主政 → 海軍 → 貿易 → 繁栄</div>;
+if(id==="sparta") return <div className={box}>少年 → 軍事訓練 → 精鋭兵 → 強軍国家</div>;
+if(id==="persia") return <div className={box}>ペルシア帝国 ↓ ギリシャ連合 ↓ 勝利 ↓ アテネ繁栄</div>;
+if(id==="pelop") return <div className={box}>アテネ拡大 ↓ スパルタ警戒 ↓ 戦争 ↓ 双方弱体化</div>;
+if(["socrates","plato","aris"].includes(id)) return <div className={box}>ソクラテス → プラトン → アリストテレス → アレクサンドロス</div>;
+if(id==="alex") return <div className={box}>ギリシャ → ペルシア → エジプト → インド</div>;
+if(id==="hellen") return <div className={box}>ギリシャ文化 ＋ オリエント文化 ↓ ヘレニズム文化</div>;
+if(id==="rome") return <div className={box}>ギリシャ思想 ↓ ローマ継承 ↓ 西洋文明</div>;
+return null;
+}
+
+function App(){
+const [selected,setSelected]=useState(null);
+const current=concepts.find(x=>x.id===selected);
+
+if(current){
+return <div className="max-w-4xl mx-auto p-8 text-white">
+<button onClick={()=>setSelected(null)} className="mb-6 px-3 py-2 bg-white/10 rounded">←戻る</button>
+<h1 className="text-4xl font-bold">{current.title}</h1>
+<p className="text-cyan-300 mt-2">{current.headline}</p>
+<div className="mt-8"><Figure id={current.id}/></div>
+<p className="mt-6 text-slate-300">{current.summary}</p>
+<div className="mt-8">
+<h3 className="font-bold mb-2">関連概念</h3>
+<div className="flex gap-2 flex-wrap">
+{current.related.map(r=>{
+const c=concepts.find(x=>x.id===r);
+return <button key={r} onClick={()=>setSelected(r)} className="px-3 py-2 rounded bg-cyan-500/20">{c.title}</button>
+})}
+</div>
+</div>
+</div>
+}
+
+return <div className="max-w-5xl mx-auto p-8 text-white">
+<h1 className="text-4xl font-bold mb-2">古代ギリシャ知識図鑑</h1>
+<p className="text-slate-400 mb-8">概念を辿って世界史を探索する</p>
+{categories.map(cat=>
+<div key={cat.id} className="mb-8">
+<h2 className="text-2xl font-bold mb-3">{cat.name}</h2>
+<div className="grid md:grid-cols-2 gap-3">
+{concepts.filter(c=>c.cat===cat.id).map(c=>
+<button key={c.id} onClick={()=>setSelected(c.id)}
+className="text-left p-5 rounded-xl bg-white/5 ring-1 ring-white/10 hover:bg-white/10">
+<div className="font-bold">{c.title}</div>
+<div className="text-cyan-300 text-sm mt-1">{c.headline}</div>
+</button>)}
+</div>
+</div>)}
+</div>
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

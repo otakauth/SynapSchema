@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>化学 知識図鑑 ─ 元素記号編</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { background:#090d16; }
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb { background:rgba(6,182,212,.26); border-radius:8px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  @keyframes rise { from { transform:translateY(6px); opacity:0; } to { transform:none; opacity:1; } }
+  .rise { animation:rise .18s ease both; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+/* ============================================================
+   SVG GRAPHICS & ICONS (元素・化学モチーフ)
+   ============================================================ */
+const SvgIcon = ({ type, className = "w-12 h-12" }) => {
+  switch (type) {
+    case "hydrogen": // 水素 (H) - 原子番号1
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(6, 182, 212, 0.05)"/>
+          <circle cx="50" cy="50" r="28" stroke="#06b6d4" strokeWidth="1.5" strokeDasharray="4 4"/>
+          <circle cx="50" cy="50" r="10" fill="#06b6d4"/>
+          <circle cx="50" cy="22" r="5" fill="#38bdf8"/>
+        </svg>
+      );
+    case "carbon": // 炭素 (C) - 多彩な結合（ダイヤモンド・黒鉛・有機物）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(16, 185, 129, 0.05)"/>
+          <polygon points="50,20 75,35 75,65 50,80 25,65 25,35" stroke="#10b981" strokeWidth="2" fill="rgba(16, 185, 129, 0.15)"/>
+          <circle cx="50" cy="50" r="8" fill="#10b981"/>
+        </svg>
+      );
+    case "gold": // 金 (Au) - 貴金属・結晶構造
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(234, 179, 8, 0.05)"/>
+          <path d="M50 20 L80 50 L50 80 L20 50 Z" stroke="#eab308" strokeWidth="2.5" fill="rgba(234, 179, 8, 0.2)"/>
+          <circle cx="50" cy="50" r="12" fill="#eab308"/>
+        </svg>
+      );
+    case "iron": // 鉄 (Fe) - 磁力・強力な金属構造
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(239, 68, 68, 0.05)"/>
+          <rect x="30" y="30" width="40" height="40" stroke="#ef4444" strokeWidth="2.5" fill="rgba(239, 68, 68, 0.15)"/>
+          <line x1="30" y1="30" x2="70" y2="70" stroke="#ef4444" strokeWidth="1.5"/>
+          <line x1="70" y1="30" x2="30" y2="70" stroke="#ef4444" strokeWidth="1.5"/>
+        </svg>
+      );
+    case "nonmetal_cat": // 非金属元素カテゴリー
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="#06b6d4" strokeWidth="3">
+          <circle cx="35" cy="40" r="18" fill="rgba(6, 182, 212, 0.2)"/>
+          <circle cx="65" cy="60" r="22" fill="rgba(6, 182, 212, 0.3)"/>
+          <line x1="35" y1="40" x2="65" y2="60" stroke="#06b6d4" strokeWidth="3"/>
+        </svg>
+      );
+    case "metal_cat": // 金属元素カテゴリー
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="#eab308" strokeWidth="3">
+          <polygon points="50,15 85,35 85,75 50,95 15,75 15,35" fill="rgba(234, 179, 8, 0.15)"/>
+          <line x1="15" y1="35" x2="85" y2="75"/>
+          <line x1="85" y1="35" x2="15" y2="75"/>
+        </svg>
+      );
+    case "noble_cat": // 貴ガス・希金属カテゴリー
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="#a855f7" strokeWidth="3">
+          <circle cx="50" cy="50" r="32" stroke="#a855f7" fill="rgba(168, 85, 247, 0.15)"/>
+          <circle cx="50" cy="50" r="10" fill="#a855f7"/>
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+/* ============================================================
+   CATEGORIES (大見出し)
+   ============================================================ */
+const CATEGORIES = [
+  { 
+    id: "nonmetal", 
+    name: "生命と物質を形作る非金属元素", 
+    icon: "nonmetal_cat",
+    description: "水素、炭素、酸素など。宇宙で最も豊富に存在し、有機物や生命活性の根幹を担う主要元素。" 
+  },
+  { 
+    id: "metal", 
+    name: "文明を支える遷移金属・実用金属", 
+    icon: "metal_cat",
+    description: "鉄、銅、アルミニウムなど。優れた導電性・強度をもち、建材から電子機器まで現代社会の骨格を作る。" 
+  },
+  { 
+    id: "noble", 
+    name: "希少性と特殊機能をもつ貴金属・貴ガス", 
+    icon: "noble_cat",
+    description: "金、ヘリウム、ネオンなど。極めて高い化学的安定性や独特の発光現象、高い価値を持つ元素群。" 
+  }
+];
+
+/* ============================================================
+   CONCEPTS (詳細データ・5つの視点軸)
+   ============================================================ */
+const CONCEPTS = [
+  {
+    id: "hydrogen", cat: "nonmetal", title: "水素 (H)", icon: "hydrogen",
+    headline: "宇宙で最も軽くて豊富に存在する、すべての元素の出発点",
+    summary: "原子番号1。宇宙の質量の約75%を占め、恒星の核融合反応の燃料となる。地球上では主に水(H₂O)や有機化合物の構成要素として存在し、次世代 クリーンエネルギーとしての活用が進んでいる。",
+    perspectives: {
+      person: [
+        { label: "原子番号", desc: "1（第1周期・1族）" },
+        { label: "電子配置", desc: "1s¹（最外殻電子1個）" },
+        { label: "主な同位体", name: "重水素(D)・三重水素(T)" },
+        { label: "反応相手", name: "酸素 (O₂)", targetId: "carbon" }
+      ],
+      era: [
+        { label: "発見", text: "1766年（ヘンリー・キャベンディッシュが気体として確認）" },
+        { label: "命名", text: "アントワーヌ・ラヴォアジエ（「水を生成するもの」の意）" },
+        { label: "状態", text: "常温常圧で無色・無臭の二原子分子ガス(H₂)" }
+      ],
+      causality: [
+        { q: "なぜ「究極のクリーンエネルギー」と呼ばれる？", a: "燃焼した際に二酸化炭素(CO₂)を出さず、水(H₂O)のみを排出するため。" },
+        { q: "なぜ空気中で燃える（爆発する）？", a: "酸素との反応熱が非常に大きく、活性化エネルギーが小さいため容易に連鎖反応を起こす。" }
+      ],
+      places: [
+        { name: "水 (H₂O)", targetId: "hydrogen" },
+        { name: "太陽・恒星内部", targetId: "hydrogen" },
+        { name: "天然ガス・石油", targetId: "carbon" }
+      ],
+      timeline: [
+        { year: "1766年", event: "キャベンディッシュが水素ガスを発見" },
+        { year: "1783年", event: "ラヴォアジエがHydrogen（水素）と命名" },
+        { year: "1931年", event: "重水素（デューテリウム）の発見" }
+      ]
+    },
+    era: "原子番号: 1 / 原子量: 1.008"
+  },
+  {
+    id: "carbon", cat: "nonmetal", title: "炭素 (C)", icon: "carbon",
+    headline: "多様な結合を造り出し、地球上のあらゆる生命の骨格となる手数の多い元素",
+    summary: "原子番号6。価電子を4個持ち、他原子と一重・二重・三重結合を自在に形成できる。ダイヤモンド、黒鉛（グラファイト）、グラフェン、フラーレンなど多様な同素体を持ち、有機化学の中心を担う。",
+    perspectives: {
+      person: [
+        { label: "原子番号", desc: "6（第2周期・14族）" },
+        { label: "価電子数", desc: "4（最大4つの共有結合）" },
+        { label: "結合相手", name: "水素 (H)", targetId: "hydrogen" }
+      ],
+      era: [
+        { label: "存在様式", text: "有機物全般、二酸化炭素(CO₂)、炭酸塩鉱物" },
+        { label: "構造特徴", text: "sp³, sp², sp 混成軌道による多様な幾何構造" }
+      ],
+      causality: [
+        { q: "なぜダイヤモンドと黒鉛は同じ炭素なのに硬さが全く違う？", a: "ダイヤモンドは3次元の強固な共有結合網構造だが、黒鉛は層状構造で層間が弱いファンデルワールス力で結合しているため。" }
+      ],
+      places: [
+        { name: "有機生命体", targetId: "carbon" },
+        { name: "大気(CO₂)", targetId: "carbon" },
+        { name: "ダイヤモンド鉱床", targetId: "carbon" }
+      ],
+      timeline: [
+        { year: "古代", event: "木炭・黒鉛として先史時代より利用" },
+        { year: "1789年", event: "ラヴォアジエが元素として特定" },
+        { year: "1985年", event: "フラーレン(C₆₀)の発見" },
+        { year: "2004年", event: "グラフェンの単離に成功" }
+      ]
+    },
+    era: "原子番号: 6 / 原子量: 12.011"
+  },
+  {
+    id: "iron", cat: "metal", title: "鉄 (Fe)", icon: "iron",
+    headline: "地球の核を占め、人類の工業文明と血液（ヘモグロビン）を支える強靭な金属",
+    summary: "原子番号26。宇宙で核融合反応が最も安定して到達する限界の元素。地球上で最も重量割合が大きい元素の1つであり、加工の容易さと強度のバランスから、建築・鉄道・機器など現代インフラの基盤となっている。",
+    perspectives: {
+      person: [
+        { label: "原子番号", desc: "26（第4周期・8族 遷移元素）" },
+        { label: "性質", desc: "強磁性、延展性、高い強度" },
+        { label: "重要化合物", name: "ヘモグロビン（酸素輸送）" }
+      ],
+      era: [
+        { label: "文明史", text: "ヒッタイトによる製鉄技術から鉄器時代へ" },
+        { label: "製錬技術", text: "高炉による鉄鉱石(Fe₂O₃)の還元反応" }
+      ],
+      causality: [
+        { q: "なぜ鉄は放置すると赤サビ(Fe₂O₃·nH₂O)ができる？", a: "水と酸素が存在する環境下で酸化還元反応が進み、熱力学的に安定な酸化鉄状態へ遷移するため。" }
+      ],
+      places: [
+        { name: "地球中心部（外核・内核）", targetId: "iron" },
+        { name: "鉄鉱床（赤鉄鉱・磁鉄鉱）", targetId: "iron" }
+      ],
+      timeline: [
+        { year: "紀元前1400年頃", event: "ヒッタイトによる製鉄技術の発明" },
+        { year: "1856年", event: "ベッセマー製鋼法の開発（大量生産化）" }
+      ]
+    },
+    era: "原子番号: 26 / 原子量: 55.845"
+  },
+  {
+    id: "gold", cat: "noble", title: "金 (Au)", icon: "gold",
+    headline: "不変の輝きを放ち、イオン化傾向が極めて低い永遠の貴金属",
+    summary: "原子番号79。展性・延性が全元素の中で最も高く、極めて薄い金箔に引き伸ばせる。王水以外の酸には溶けず、腐蝕・変色しないため、古来より通貨や装飾品、現代では高信頼性の電子基板配線に用いられる。",
+    perspectives: {
+      person: [
+        { label: "原子番号", desc: "79（第6周期・11族）" },
+        { label: "特性", desc: "最高の展延性、非常に小さい電気抵抗" },
+        { label: "溶解", name: "王水（濃硝酸＋濃塩酸）のみに溶解" }
+      ],
+      era: [
+        { label: "物理特性", text: "金色の光沢（相対論的効果による青色光の吸収）" }
+      ],
+      causality: [
+        { q: "なぜ金は錆びたり変色したりしない？", a: "イオン化傾向が極めて小さく、酸素や水と電子の授受（酸化反応）を行わないため。" }
+      ],
+      places: [
+        { name: "金鉱脈・熱水鉱床", targetId: "gold" },
+        { name: "精密電子機器の端子", targetId: "gold" }
+      ],
+      timeline: [
+        { year: "紀元前3000年超", event: "エジプト文明等で装飾品・通貨として利用" },
+        { year: "1848年", event: "カリフォルニア・ゴールドラッシュ発生" }
+      ]
+    },
+    era: "原子番号: 79 / 原子量: 196.97"
+  }
+];
+
+const byId = (id) => CONCEPTS.find(c => c.id === id) || {
+  id, title: id, headline: "（詳細データ準備中）", summary: "順次追加予定です。", perspectives: null, icon: null
+};
+
+/* ============================================================
+   CHRONOLOGY (元素発見史・化学史年表)
+   ============================================================ */
+const TIMELINE = [
+  { year: "古代", title: "金・銅・鉄・炭素など単体として存在する元素の利用", conceptId: "gold" },
+  { year: "1669年", title: "ヘニッヒ・ブランドがリン(P)を発見（近代的な元素発見の始まり）" },
+  { year: "1766年", title: "キャベンディッシュが水素(H)を発見", conceptId: "hydrogen" },
+  { year: "1774年", title: "プリーストリーが酸素(O)を発見" },
+  { year: "1789年", title: "ラヴォアジエが『化学命名法』を出版（近代化学の確立）", conceptId: "carbon" },
+  { year: "1869年", title: "メンデレーエフが元素の「周期表」を提案" },
+  { year: "1898年", title: "キュリー夫妻がキュリウム・ポロニウム・ラジウムを発見" },
+  { year: "1940年", title: "超ウラン元素（人工元素）の合成開始" },
+  { year: "2016年", title: "113番元素「ニホニウム (Nh)」が正式命名" }
+];
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+function App() {
+  const [page, setPage] = useState("home"); 
+  const [selectedCat, setSelectedCat] = useState(null);
+  const [selectedConcept, setSelectedConcept] = useState(null);
+
+  const concept = selectedConcept ? byId(selectedConcept) : null;
+
+  const goHome = () => { setPage("home"); setSelectedCat(null); setSelectedConcept(null); jump(); };
+  const goTimeline = () => { setPage("timeline"); jump(); };
+  const goCat = (id) => { setSelectedCat(id); setPage("cat"); setSelectedConcept(null); jump(); };
+  const goConcept = (id) => {
+    const c = byId(id);
+    setSelectedConcept(id);
+    if (c && c.cat) setSelectedCat(c.cat);
+    setPage("concept");
+    jump();
+  };
+
+  function jump() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+  const catObj = selectedCat ? CATEGORIES.find(c => c.id === selectedCat) : null;
+
+  return (
+    <div className="min-h-screen text-slate-100 selection:bg-cyan-500/30"
+      style={{ background: "radial-gradient(1000px 480px at 12% -10%, rgba(6,182,212,.12), transparent 60%), #090d16" }}>
+      <div className="max-w-3xl mx-auto px-5 sm:px-8 py-9">
+
+        {/* ヘッダー領域 */}
+        <div className="mb-7 flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-[22px] font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={goHome}>
+              ⚛️ 化学 知識図鑑 ─ 元素記号編
+            </h1>
+            <p className="text-[13px] text-slate-400 mt-1">万物を構成する基本単位を「5つの視点」で解き明かす</p>
+          </div>
+          <button onClick={goTimeline}
+            className={`px-4 py-2 rounded-xl text-[13px] font-bold ring-1 transition flex items-center gap-1.5 ${
+              page === "timeline"
+                ? "bg-cyan-600 text-white ring-cyan-400"
+                : "bg-cyan-500/10 text-cyan-300 ring-cyan-500/30 hover:bg-cyan-500/20"
+            }`}>
+            📅 発見史年表で全体を確認
+          </button>
+        </div>
+
+        {/* パンくずリスト */}
+        <div className="flex items-center gap-2 text-[13px] text-slate-400 mb-8 flex-wrap">
+          <button onClick={goHome} className="hover:text-slate-200 transition">図鑑トップ</button>
+          {page === "timeline" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <span className="text-cyan-400 font-semibold">元素発見史</span>
+            </>
+          )}
+          {selectedCat && page !== "timeline" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <button onClick={() => goCat(selectedCat)} className="hover:text-slate-200 transition">
+                {catObj ? catObj.name : selectedCat}
+              </button>
+            </>
+          )}
+          {concept && page === "concept" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <span className="text-cyan-400 font-semibold">{concept.title}</span>
+            </>
+          )}
+        </div>
+
+        {/* ---------------- L1: TOP カテゴリー一覧 ---------------- */}
+        {page === "home" && (
+          <div className="rise space-y-4">
+            <div className="text-[12px] font-bold text-slate-400 mb-1">分類を選択してください</div>
+            {CATEGORIES.map(cat => {
+              const count = CONCEPTS.filter(c => c.cat === cat.id).length;
+              return (
+                <div key={cat.id} onClick={() => goCat(cat.id)}
+                  className="group cursor-pointer rounded-xl p-5 bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] hover:ring-cyan-500/40 transition flex items-center gap-5">
+                  <div className="flex-shrink-0 p-2 rounded-lg bg-slate-900/80 border border-white/5">
+                    <SvgIcon type={cat.icon} className="w-14 h-14" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <h2 className="text-[17px] font-bold text-white group-hover:text-cyan-300 transition">{cat.name}</h2>
+                      <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300">{count} 項目</span>
+                    </div>
+                    <p className="text-[13.5px] text-slate-400 leading-relaxed">{cat.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ---------------- L2: カテゴリー内 概念リスト ---------------- */}
+        {page === "cat" && catObj && (
+          <div className="rise">
+            <div className="mb-6 p-5 rounded-2xl bg-cyan-500/[.05] ring-1 ring-cyan-500/20 flex items-center gap-4">
+              <SvgIcon type={catObj.icon} className="w-12 h-12 flex-shrink-0" />
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">{catObj.name}</h2>
+                <p className="text-[14px] text-slate-300 leading-relaxed">{catObj.description}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {CONCEPTS.filter(c => c.cat === selectedCat).map(c => (
+                <button key={c.id} onClick={() => goConcept(c.id)}
+                  className="w-full text-left rounded-xl p-4 bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] hover:ring-cyan-500/40 transition flex items-center gap-4">
+                  <div className="flex-shrink-0 p-1.5 rounded-lg bg-slate-900/80 border border-white/5">
+                    <SvgIcon type={c.icon} className="w-10 h-10" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-[17px] text-white">{c.title}</div>
+                      <span className="text-[11px] text-slate-400 font-mono">{c.era}</span>
+                    </div>
+                    <div className="text-[13.5px] text-cyan-300 mt-0.5 truncate">{c.headline}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- L3: 概念詳細ページ（5つの視点） ---------------- */}
+        {page === "concept" && concept && (
+          <div className="rise space-y-6">
+            <div className="flex items-start gap-5 p-5 rounded-2xl bg-white/[.03] ring-1 ring-white/10">
+              <div className="flex-shrink-0 p-3 rounded-xl bg-slate-900/90 border border-white/10">
+                <SvgIcon type={concept.icon} className="w-16 h-16" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between text-[12px] text-slate-400 mb-1">
+                  <span>{catObj ? catObj.name : ""}</span>
+                  <span className="font-mono text-cyan-300">{concept.era}</span>
+                </div>
+                <h2 className="text-[28px] leading-tight font-bold text-white">{concept.title}</h2>
+                <p className="text-[15px] font-semibold text-cyan-200 mt-1">{concept.headline}</p>
+                <p className="text-[14px] leading-relaxed text-slate-300 mt-3">{concept.summary}</p>
+              </div>
+            </div>
+
+            {concept.perspectives && (
+              <div className="space-y-4">
+                
+                {/* 1. 化学的性質 & 2. 発見・状態 */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* ⚛️ 化学的性質 */}
+                  {concept.perspectives.person && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-cyan-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        ⚛️ 化学的スペック・構造
+                      </h3>
+                      <div className="space-y-2 text-[13px]">
+                        {concept.perspectives.person.map((p, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-slate-400 font-semibold min-w-[70px]">{p.label}:</span>
+                            {p.targetId ? (
+                              <button onClick={() => goConcept(p.targetId)} className="text-cyan-300 underline hover:text-cyan-100 text-left font-semibold">
+                                {p.name || p.desc}
+                              </button>
+                            ) : (
+                              <span className="text-slate-200">{p.desc || p.name}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ⏳ 発見史・存在形態 */}
+                  {concept.perspectives.era && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-amber-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        ⏳ 発見・自然界での存在
+                      </h3>
+                      <div className="space-y-2 text-[13px]">
+                        {concept.perspectives.era.map((e, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-slate-400 font-semibold min-w-[50px]">{e.label}:</span>
+                            {e.targetId ? (
+                              <button onClick={() => goConcept(e.targetId)} className="text-amber-300 underline hover:text-amber-100 text-left">
+                                {e.text}
+                              </button>
+                            ) : (
+                              <span className="text-slate-200">{e.text}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. 反応・因果 */}
+                {concept.perspectives.causality && (
+                  <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                    <h3 className="text-rose-300 font-bold text-[14px] mb-3 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                      🔄 反応機構・なぜ？の解明
+                    </h3>
+                    <div className="space-y-3 text-[13px]">
+                      {concept.perspectives.causality.map((c, i) => (
+                        <div key={i} className="border-l-2 border-rose-500/40 pl-3 space-y-0.5">
+                          <div className="font-semibold text-rose-200">Q. {c.q}</div>
+                          <div className="text-slate-300 leading-relaxed">{c.a}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. 存在場所 & 5. 関連年表 */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* 📍 主な存在・用途 */}
+                  {concept.perspectives.places && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-emerald-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        📍 主な存在場所・用途
+                      </h3>
+                      <div className="flex flex-wrap gap-2 text-[12.5px]">
+                        {concept.perspectives.places.map((pl, i) => (
+                          <span key={i} className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                            {pl.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 📜 関連略年表 */}
+                  {concept.perspectives.timeline && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-purple-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        📜 関連歴史年表
+                      </h3>
+                      <div className="space-y-1.5 text-[12.5px]">
+                        {concept.perspectives.timeline.map((t, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <span className="font-mono text-purple-300 text-[11px] min-w-[55px]">{t.year}</span>
+                            <span className="text-slate-300 truncate">{t.event}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ---------------- L4: 発見史年表ページ ---------------- */}
+        {page === "timeline" && (
+          <div className="rise space-y-6">
+            <div className="p-5 rounded-2xl bg-cyan-500/[.05] ring-1 ring-cyan-500/20">
+              <h2 className="text-xl font-bold text-white mb-1">元素発見・化学史年表</h2>
+              <p className="text-[13.5px] text-slate-300">古代の金属利用から周期表の成立、現代の人工元素創出まで</p>
+            </div>
+            <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-cyan-500/30">
+              {TIMELINE.map((item, idx) => (
+                <div key={idx} className="relative group flex items-start justify-between gap-4 p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] transition">
+                  <div className="absolute -left-[19px] top-5 w-2.5 h-2.5 rounded-full bg-cyan-500 ring-4 ring-[#090d16]" />
+                  <div>
+                    <span className="font-mono text-[12px] font-bold text-cyan-400 block mb-0.5">{item.year}</span>
+                    <h3 className="font-bold text-[15px] text-white">{item.title}</h3>
+                  </div>
+                  {item.conceptId && (
+                    <button onClick={() => goConcept(item.conceptId)} className="flex-shrink-0 px-3 py-1 rounded-lg text-[12px] font-semibold bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 transition border border-cyan-500/30">
+                      詳細を見る
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

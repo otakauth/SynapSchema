@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本史 知識図鑑 ─ 昭和史編</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { background:#0c0a09; }
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb { background:rgba(217,119,6,.26); border-radius:8px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  @keyframes rise { from { transform:translateY(6px); opacity:0; } to { transform:none; opacity:1; } }
+  .rise { animation:rise .18s ease both; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+/* ============================================================
+   SVG GRAPHICS & ICONS (昭和史向けモチーフ)
+   ============================================================ */
+const SvgIcon = ({ type, className = "w-12 h-12" }) => {
+  switch (type) {
+    case "war_cat": // 戦争と試練の時代（波乱と軍帽・旗）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(239, 68, 68, 0.05)"/>
+          <path d="M30 65 L50 35 L70 65 Z" fill="rgba(239, 68, 68, 0.2)" stroke="#ef4444" strokeWidth="2.5"/>
+          <circle cx="50" cy="50" r="6" fill="#ef4444"/>
+          <line x1="20" y1="75" x2="80" y2="75" stroke="#ef4444" strokeWidth="2"/>
+        </svg>
+      );
+    case "rebuild_cat": // 復興と高度経済成長（東京タワー・上昇グラフ）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(234, 179, 8, 0.05)"/>
+          <path d="M50 18 L62 78 H38 Z" stroke="#eab308" strokeWidth="2" fill="rgba(234, 179, 8, 0.15)"/>
+          <line x1="42" y1="45" x2="58" y2="45" stroke="#eab308" strokeWidth="2"/>
+          <line x1="39" y1="62" x2="61" y2="62" stroke="#eab308" strokeWidth="2"/>
+          <path d="M20 70 L40 50 L60 58 L85 25" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round"/>
+        </svg>
+      );
+    case "culture_cat": // 昭和カルチャーとバブル（テレビ・新幹線・光）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(168, 85, 247, 0.05)"/>
+          <rect x="22" y="32" width="56" height="42" rx="6" stroke="#a855f7" strokeWidth="2.5" fill="rgba(168, 85, 247, 0.15)"/>
+          <line x1="38" y1="20" x2="46" y2="32" stroke="#a855f7" strokeWidth="2"/>
+          <line x1="62" y1="20" x2="54" y2="32" stroke="#a855f7" strokeWidth="2"/>
+          <circle cx="68" cy="44" r="3" fill="#a855f7"/>
+          <circle cx="68" cy="54" r="3" fill="#a855f7"/>
+        </svg>
+      );
+    case "showa_tenno": // 昭和天皇（菊紋モチーフ）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(234, 179, 8, 0.05)"/>
+          <circle cx="50" cy="50" r="16" stroke="#eab308" strokeWidth="2" fill="rgba(234, 179, 8, 0.2)"/>
+          {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => (
+            <line key={deg} x1="50" y1="50" x2={50 + 30 * Math.cos(deg * Math.PI / 180)} y2={50 + 30 * Math.sin(deg * Math.PI / 180)} stroke="#eab308" strokeWidth="2"/>
+          ))}
+        </svg>
+      );
+    case "yoshida": // 吉田茂（白洲次郎・講和条約・メガネモチーフ）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(56, 189, 248, 0.05)"/>
+          <circle cx="36" cy="50" r="14" stroke="#38bdf8" strokeWidth="2.5" fill="rgba(56, 189, 248, 0.1)"/>
+          <circle cx="64" cy="50" r="14" stroke="#38bdf8" strokeWidth="2.5" fill="rgba(56, 189, 248, 0.1)"/>
+          <line x1="50" y1="50" x2="50" y2="50" stroke="#38bdf8" strokeWidth="3"/>
+          <line x1="22" y1="46" x2="12" y2="42" stroke="#38bdf8" strokeWidth="2"/>
+          <line x1="78" y1="46" x2="88" y2="42" stroke="#38bdf8" strokeWidth="2"/>
+        </svg>
+      );
+    case "kakuei": // 田中角栄（日本列島改造論・機関車）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(249, 115, 22, 0.05)"/>
+          <path d="M20 65 Q50 35 80 65" stroke="#f97316" strokeWidth="3" fill="none"/>
+          <rect x="35" y="40" width="30" height="20" stroke="#f97316" strokeWidth="2" fill="rgba(249, 115, 22, 0.2)"/>
+          <circle cx="35" cy="65" r="6" fill="#f97316"/>
+          <circle cx="65" cy="65" r="6" fill="#f97316"/>
+        </svg>
+      );
+    case "pacific_war": // 太平洋戦争
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(225, 29, 72, 0.05)"/>
+          <line x1="25" y1="25" x2="75" y2="75" stroke="#e11d48" strokeWidth="3" strokeLinecap="round"/>
+          <line x1="75" y1="25" x2="25" y2="75" stroke="#e11d48" strokeWidth="3" strokeLinecap="round"/>
+          <circle cx="50" cy="50" r="14" fill="#e11d48"/>
+        </svg>
+      );
+    case "olympic": // 1964東京オリンピック・高度成長
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(16, 185, 129, 0.05)"/>
+          <circle cx="35" cy="42" r="12" stroke="#10b981" strokeWidth="2"/>
+          <circle cx="65" cy="42" r="12" stroke="#10b981" strokeWidth="2"/>
+          <circle cx="50" cy="58" r="12" stroke="#10b981" strokeWidth="2"/>
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+/* ============================================================
+   CATEGORIES (大見出し)
+   ============================================================ */
+const CATEGORIES = [
+  { 
+    id: "war", 
+    name: "激動と試練（戦前・太平洋戦争）", 
+    icon: "war_cat",
+    description: "昭和恐慌から満州事変、日中戦争、そして太平洋戦争へ。日本が歩んだ激動の時代。" 
+  },
+  { 
+    id: "rebuild", 
+    name: "復興と高度経済成長", 
+    icon: "rebuild_cat",
+    description: "敗戦の焦土からの再起。サンフランシスコ講和、東京五輪、そして世界第2位の経済大国へ。" 
+  },
+  { 
+    id: "culture", 
+    name: "昭和カルチャーとバブル景気", 
+    icon: "culture_cat",
+    description: "三種の神器、テレビ文化の開花、新幹線の開業、そして昭和末期のバブル経済狂騒曲。" 
+  }
+];
+
+/* ============================================================
+   CONCEPTS (詳細データ・5つの視点軸)
+   ============================================================ */
+const CONCEPTS = [
+  {
+    id: "showa_tenno", cat: "war", title: "昭和天皇", icon: "showa_tenno",
+    headline: "激動の昭和を象徴し、大日本帝国から日本国憲法下の「象徴」へ",
+    summary: "1926年に即位。戦前・戦中は大元帥として激動の時代を歩み、1945年8月15日の玉音放送により終戦を決断。戦後は象徴天皇として全国を巡幸し、日本の復興と平和を祈り続けた。",
+    perspectives: {
+      person: [
+        { label: "立場", desc: "第124代天皇。戦前は統帥権保持者、戦後は日本国の象徴。" },
+        { label: "首相", name: "東條英機", targetId: "pacific_war" },
+        { label: "交渉", name: "マッカーサー（GHQ最高司令官）" },
+        { label: "復興相", name: "吉田茂", targetId: "yoshida" }
+      ],
+      era: [
+        { label: "前史", text: "大正デモクラシーの終わりと昭和恐慌による社会不安" },
+        { label: "転換", text: "大日本帝国憲法から日本国憲法への移行（象徴天皇制）" },
+        { label: "時代", text: "戦前軍部台頭 〜 戦後復興・高度成長期" }
+      ],
+      causality: [
+        { q: "なぜ終戦を決断（聖断）できた？", a: "ポツダム宣言受諾をめぐり閣議が紛糾する中、鈴木貫太郎首相らの要請を受けて受諾を決定し、本土決戦による国民の全滅を避けるため。" },
+        { q: "なぜ戦後巡幸を行った？", a: "傷ついた国民を励まし、自ら戦災の跡を確かめて復興への勇気を与えるため。" }
+      ],
+      places: [
+        { name: "皇居（東京）", targetId: "showa_tenno" },
+        { name: "広島・長崎", targetId: "pacific_war" }
+      ],
+      timeline: [
+        { year: "1926年", event: "昭和に改元・即位" },
+        { year: "1945年", event: "ポツダム宣言受諾・玉音放送", targetId: "pacific_war" },
+        { year: "1946年", event: "人間宣言・戦後全国巡幸開始" },
+        { year: "1989年", event: "崩御（昭和の終わり・崩御年87歳）" }
+      ]
+    },
+    era: "1901年 〜 1989年（昭和元年〜64年）"
+  },
+  {
+    id: "pacific_war", cat: "war", title: "太平洋戦争（大東亜戦争）", icon: "pacific_war",
+    headline: "日米開戦から焦土化、原爆投下を経て迎えた悲劇の終焉",
+    summary: "1941年12月8日の真珠湾攻撃により開戦。初期は東南アジアへ進出するも、ミッドウェー海戦以降は劣勢に。本土空襲や沖縄戦、二度の原子爆弾投下を経て1945年8月にポツダム宣言を受諾し終戦した。",
+    perspectives: {
+      person: [
+        { label: "開戦時首相", name: "東條英機" },
+        { label: "終戦時首相", name: "鈴木貫太郎" },
+        { label: "国家元首", name: "昭和天皇", targetId: "showa_tenno" }
+      ],
+      era: [
+        { label: "背景", text: "日中戦争の泥沼化とABCD包囲網による経済封鎖" },
+        { label: "影響", text: "約310万人の日本人戦死者と全国主要都市の焦土化" }
+      ],
+      causality: [
+        { q: "なぜ日米開戦に至った？", a: "満州事変以降の対外進出に対し、米国が「石油禁輸」などの強力な経済制裁を行い、追い詰められた軍部が開戦を選択したため。" },
+        { q: "なぜ戦争継続が不可能な状態になった？", a: "制海権・制空権を失って資材や燃料が底をつき、本土空襲・原爆投下・ソ連参戦によって壊滅的打撃を受けたため。" }
+      ],
+      places: [
+        { name: "真珠湾（ハワイ）" },
+        { name: "ミッドウェー島" },
+        { name: "沖縄" },
+        { name: "広島・長崎" }
+      ],
+      timeline: [
+        { year: "1941年12月", event: "真珠湾攻撃（太平洋戦争開戦）" },
+        { year: "1942年6月", event: "ミッドウェー海戦（転換点）" },
+        { year: "1945年8月", event: "広島・長崎原爆投下・終戦" }
+      ]
+    },
+    era: "1941年 〜 1945年"
+  },
+  {
+    id: "yoshida", cat: "rebuild", title: "吉田茂", icon: "yoshida",
+    headline: "ワンマン宰相として戦後日本の国交回復と軽武装・経済重視の礎を築く",
+    summary: "戦後の混乱期に通算5代にわたり首相を務める。1951年にサンフランシスコ平和条約を結び主権を回復させると同時に、日米安全保障条約を締結。「再軍備を抑えて経済復興に集中する（ドクトリン）」路線を確立した。",
+    perspectives: {
+      person: [
+        { label: "立場", desc: "戦後初期の内閣総理大臣。「ワンマン」と称された。" },
+        { label: "側近", name: "白洲次郎" },
+        { label: "交渉相手", name: "マッカーサー（GHQ最高司令官）" },
+        { label: "後継者", name: "池田勇人・佐藤栄作" }
+      ],
+      era: [
+        { label: "背景", text: "GHQによる占領統治と冷戦構造の激化（朝鮮戦争発生）" }
+      ],
+      causality: [
+        { q: "なぜサンフランシスコ講和を選んだ？", a: "ソ連など東側陣営を除く多数国との「多数講和」を優先し、早期に日本の主権を回復させるため。" },
+        { q: "なぜ再軍備要求を拒んだ？", a: "復興途上の経済的負担を避け、憲法9条を楯にして経済成長に国力を集中させるため。" }
+      ],
+      places: [
+        { name: "サンフランシスコ（米国）" },
+        { name: "大磯（神奈川）" }
+      ],
+      timeline: [
+        { year: "1946年", event: "第一次吉田内閣発足" },
+        { year: "1951年", event: "サンフランシスコ平和条約・旧日米安保条約調印" },
+        { year: "1954年", event: "退陣" }
+      ]
+    },
+    era: "1878年 〜 1967年"
+  },
+  {
+    id: "olympic", cat: "rebuild", title: "1964年 東京オリンピックと高度経済成長", icon: "olympic",
+    headline: "戦後復興の結実。インフラ整備と家電普及で「もはや戦後ではない」を実証",
+    summary: "アジア初のオリンピック開催に向け、東海道新幹線や首都高速道路などのインフラが急ピッチで整備された。「三種の神器（白黒テレビ・洗濯機・冷蔵庫）」や「3C（カラーテレビ・クーラー・カー）」が普及し、国民生活は劇的に豊かになった。",
+    perspectives: {
+      person: [
+        { label: "首相", name: "池田勇人（所得倍増計画推進）" },
+        { label: "後任首相", name: "佐藤栄作（東京五輪実施）" }
+      ],
+      era: [
+        { label: "スローガン", text: "「もはや戦後ではない」（1956年 経済白書）" },
+        { label: "景気", text: "神武景気・岩戸景気・オリンピック景気・いざなぎ景気" }
+      ],
+      causality: [
+        { q: "なぜ驚異的な経済成長が可能だった？", a: "豊富な良質の労働力、高い貯蓄率による設備投資、新技術導入、米国の安全保障傘下での防衛費抑制が噛み合ったため。" }
+      ],
+      places: [
+        { name: "国立競技場（東京）" },
+        { name: "東海道新幹線（東京〜新大阪）" }
+      ],
+      timeline: [
+        { year: "1960年", event: "池田内閣が「所得倍増計画」発表" },
+        { year: "1964年10月1日", event: "東海道新幹線開業" },
+        { year: "1964年10月10日", event: "東京オリンピック開幕" },
+        { year: "1968年", event: "GNP（国民総生産）世界第2位に浮上" }
+      ]
+    },
+    era: "1950年代半ば 〜 1970年代初頭"
+  },
+  {
+    id: "kakuei", cat: "culture", title: "田中角栄と日本列島改造論", icon: "kakuei",
+    headline: "「今太閤」と呼ばれた庶民派宰相。新幹線・高速道路網で全国を網羅",
+    summary: "高等小学校卒から叩き上げで首相に就任。1972年に著書『日本列島改造論』を掲げ、高速鉄道や高速道路で地方と都市を結ぶ国土開発を推進。日中国交正常化を果たしたが、のちにロッキード事件で逮捕された。",
+    perspectives: {
+      person: [
+        { label: "立場", desc: "第64・65代内閣総理大臣。政界の「闇の将軍」。" },
+        { label: "ライバル", name: "福田赳夫（角福戦争）" },
+        { label: "中国側会談", name: "周恩来（日中国交正常化）" }
+      ],
+      era: [
+        { label: "背景", text: "高度成長に伴う地方の過疎化と都市の過密化" },
+        { label: "転換", text: "オイルショックによる狂乱物価と高度成長の終わり" }
+      ],
+      causality: [
+        { q: "なぜ「列島改造」を唱えた？", a: "インフラを全国に敷設することで地方の経済格差をなくし、全国を一体化させようとしたため。" },
+        { q: "なぜ電撃的に日中国交正常化を達成できた？", a: "米中の接近を素早く察知し、強い政治力と決断力で中国側との直接交渉に踏み切ったため。" }
+      ],
+      places: [
+        { name: "新潟（故郷・上越新幹線）" },
+        { name: "北京（日中共同声明）" }
+      ],
+      timeline: [
+        { year: "1972年7月", event: "田中角栄内閣発足・『日本列島改造論』" },
+        { year: "1972年9月", event: "日中国交正常化（日中共同声明調印）" },
+        { year: "1973年", event: "第1次オイルショック（狂乱物価）" },
+        { year: "1976年", event: "ロッキード事件で逮捕" }
+      ]
+    },
+    era: "1918年 〜 1993年"
+  }
+];
+
+const byId = (id) => CONCEPTS.find(c => c.id === id) || {
+  id, title: id, headline: "（詳細データ準備中）", summary: "順次追加予定です。", perspectives: null, icon: null
+};
+
+/* ============================================================
+   CHRONOLOGY (昭和史 全体年表)
+   ============================================================ */
+const TIMELINE = [
+  { year: "1926年（昭和元年）", title: "昭和に改元（昭和天皇即位）", conceptId: "showa_tenno" },
+  { year: "1931年（昭和6年）", title: "満州事変発生" },
+  { year: "1937年（昭和12年）", title: "日中戦争開戦" },
+  { year: "1941年（昭和16年）", title: "太平洋戦争開戦（真珠湾攻撃）", conceptId: "pacific_war" },
+  { year: "1945年（昭和20年）", title: "終戦・ポツダム宣言受諾", conceptId: "pacific_war" },
+  { year: "1946年（昭和21年）", title: "日本国憲法公布（翌年施行）" },
+  { year: "1951年（昭和26年）", title: "サンフランシスコ平和条約調印（主権回復）", conceptId: "yoshida" },
+  { year: "1956年（昭和31年）", title: "国際連合加盟・「もはや戦後ではない」" },
+  { year: "1964年（昭和39年）", title: "東海道新幹線開業・東京オリンピック開催", conceptId: "olympic" },
+  { year: "1972年（昭和47年）", title: "沖縄返還・日中国交正常化", conceptId: "kakuei" },
+  { year: "1973年（昭和48年）", title: "第1次オイルショック（高度経済成長の終焉）", conceptId: "kakuei" },
+  { year: "1985年（昭和60年）", title: "プラザ合意（円高加速・バブル景気へ）" },
+  { year: "1989年（昭和64年）", title: "昭和天皇崩御・昭和の終了", conceptId: "showa_tenno" }
+];
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+function App() {
+  const [page, setPage] = useState("home"); 
+  const [selectedCat, setSelectedCat] = useState(null);
+  const [selectedConcept, setSelectedConcept] = useState(null);
+
+  const concept = selectedConcept ? byId(selectedConcept) : null;
+
+  const goHome = () => { setPage("home"); setSelectedCat(null); setSelectedConcept(null); jump(); };
+  const goTimeline = () => { setPage("timeline"); jump(); };
+  const goCat = (id) => { setSelectedCat(id); setPage("cat"); setSelectedConcept(null); jump(); };
+  const goConcept = (id) => {
+    const c = byId(id);
+    setSelectedConcept(id);
+    if (c && c.cat) setSelectedCat(c.cat);
+    setPage("concept");
+    jump();
+  };
+
+  function jump() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+  const catObj = selectedCat ? CATEGORIES.find(c => c.id === selectedCat) : null;
+
+  return (
+    <div className="min-h-screen text-stone-100 selection:bg-amber-500/30"
+      style={{ background: "radial-gradient(1000px 480px at 12% -10%, rgba(217,119,6,.1), transparent 60%), #0c0a09" }}>
+      <div className="max-w-3xl mx-auto px-5 sm:px-8 py-9">
+
+        {/* ヘッダー領域 */}
+        <div className="mb-7 flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-[22px] font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={goHome}>
+              📜 日本史 知識図鑑 ─ 昭和史編
+            </h1>
+            <p className="text-[13px] text-stone-400 mt-1">激動の64年「戦争・復興・発展」を「5つの視点」で読み解く</p>
+          </div>
+          <button onClick={goTimeline}
+            className={`px-4 py-2 rounded-xl text-[13px] font-bold ring-1 transition flex items-center gap-1.5 ${
+              page === "timeline"
+                ? "bg-amber-600 text-white ring-amber-400"
+                : "bg-amber-500/10 text-amber-300 ring-amber-500/30 hover:bg-amber-500/20"
+            }`}>
+            📅 昭和年表で全体を確認する
+          </button>
+        </div>
+
+        {/* パンくずリスト */}
+        <div className="flex items-center gap-2 text-[13px] text-stone-400 mb-8 flex-wrap">
+          <button onClick={goHome} className="hover:text-stone-200 transition">図鑑トップ</button>
+          {page === "timeline" && (
+            <>
+              <span className="text-stone-600">/</span>
+              <span className="text-amber-400 font-semibold">昭和史年表</span>
+            </>
+          )}
+          {selectedCat && page !== "timeline" && (
+            <>
+              <span className="text-stone-600">/</span>
+              <button onClick={() => goCat(selectedCat)} className="hover:text-stone-200 transition">
+                {catObj ? catObj.name : selectedCat}
+              </button>
+            </>
+          )}
+          {concept && page === "concept" && (
+            <>
+              <span className="text-stone-600">/</span>
+              <span className="text-amber-400 font-semibold">{concept.title}</span>
+            </>
+          )}
+        </div>
+
+        {/* ---------------- L1: TOP カテゴリー一覧 ---------------- */}
+        {page === "home" && (
+          <div className="rise space-y-4">
+            <div className="text-[12px] font-bold text-stone-400 mb-1">カテゴリーを選択してください</div>
+            {CATEGORIES.map(cat => {
+              const count = CONCEPTS.filter(c => c.cat === cat.id).length;
+              return (
+                <div key={cat.id} onClick={() => goCat(cat.id)}
+                  className="group cursor-pointer rounded-xl p-5 bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] hover:ring-amber-500/40 transition flex items-center gap-5">
+                  <div className="flex-shrink-0 p-2 rounded-lg bg-stone-900/80 border border-white/5">
+                    <SvgIcon type={cat.icon} className="w-14 h-14" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <h2 className="text-[17px] font-bold text-white group-hover:text-amber-300 transition">{cat.name}</h2>
+                      <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-stone-300">{count} 項目</span>
+                    </div>
+                    <p className="text-[13.5px] text-stone-400 leading-relaxed">{cat.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ---------------- L2: カテゴリー内 概念リスト ---------------- */}
+        {page === "cat" && catObj && (
+          <div className="rise">
+            <div className="mb-6 p-5 rounded-2xl bg-amber-500/[.05] ring-1 ring-amber-500/20 flex items-center gap-4">
+              <SvgIcon type={catObj.icon} className="w-12 h-12 flex-shrink-0" />
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">{catObj.name}</h2>
+                <p className="text-[14px] text-stone-300 leading-relaxed">{catObj.description}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {CONCEPTS.filter(c => c.cat === selectedCat).map(c => (
+                <button key={c.id} onClick={() => goConcept(c.id)}
+                  className="w-full text-left rounded-xl p-4 bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] hover:ring-amber-500/40 transition flex items-center gap-4">
+                  <div className="flex-shrink-0 p-1.5 rounded-lg bg-stone-900/80 border border-white/5">
+                    <SvgIcon type={c.icon} className="w-10 h-10" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-[17px] text-white">{c.title}</div>
+                      <span className="text-[11px] text-stone-500 font-mono">{c.era}</span>
+                    </div>
+                    <div className="text-[13.5px] text-amber-300 mt-0.5 truncate">{c.headline}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- L3: 概念詳細ページ（5つの視点） ---------------- */}
+        {page === "concept" && concept && (
+          <div className="rise space-y-6">
+            <div className="flex items-start gap-5 p-5 rounded-2xl bg-white/[.03] ring-1 ring-white/10">
+              <div className="flex-shrink-0 p-3 rounded-xl bg-stone-900/90 border border-white/10">
+                <SvgIcon type={concept.icon} className="w-16 h-16" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between text-[12px] text-stone-400 mb-1">
+                  <span>{catObj ? catObj.name : ""}</span>
+                  <span className="font-mono text-amber-300">{concept.era}</span>
+                </div>
+                <h2 className="text-[28px] leading-tight font-bold text-white">{concept.title}</h2>
+                <p className="text-[15px] font-semibold text-amber-200 mt-1">{concept.headline}</p>
+                <p className="text-[14px] leading-relaxed text-stone-300 mt-3">{concept.summary}</p>
+              </div>
+            </div>
+
+            {concept.perspectives && (
+              <div className="space-y-4">
+                
+                {/* 1. 人物 & 2. 時代 */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* 👤 人物 */}
+                  {concept.perspectives.person && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-amber-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        👤 人物・関係者
+                      </h3>
+                      <div className="space-y-2 text-[13px]">
+                        {concept.perspectives.person.map((p, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-stone-400 font-semibold min-w-[65px]">{p.label}:</span>
+                            {p.targetId ? (
+                              <button onClick={() => goConcept(p.targetId)} className="text-amber-300 underline hover:text-amber-100 text-left font-semibold">
+                                {p.name || p.desc}
+                              </button>
+                            ) : (
+                              <span className="text-stone-200">{p.desc || p.name}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ⏳ 時代 */}
+                  {concept.perspectives.era && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-orange-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        ⏳ 時代背景・情勢
+                      </h3>
+                      <div className="space-y-2 text-[13px]">
+                        {concept.perspectives.era.map((e, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-stone-400 font-semibold min-w-[65px]">{e.label}:</span>
+                            {e.targetId ? (
+                              <button onClick={() => goConcept(e.targetId)} className="text-orange-300 underline hover:text-orange-100 text-left">
+                                {e.text}
+                              </button>
+                            ) : (
+                              <span className="text-stone-200">{e.text}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. 因果 */}
+                {concept.perspectives.causality && (
+                  <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                    <h3 className="text-red-300 font-bold text-[14px] mb-3 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                      🔄 因果（なぜ？どうして？）
+                    </h3>
+                    <div className="space-y-3 text-[13px]">
+                      {concept.perspectives.causality.map((c, i) => (
+                        <div key={i} className="border-l-2 border-red-500/40 pl-3 space-y-0.5">
+                          <div className="font-semibold text-red-200">Q. {c.q}</div>
+                          <div className="text-stone-300 leading-relaxed">{c.a}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. 場所 & 5. 関連年表 */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* 📍 関連場所 */}
+                  {concept.perspectives.places && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-emerald-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        📍 舞台・ゆかりの地
+                      </h3>
+                      <div className="flex flex-wrap gap-2 text-[12.5px]">
+                        {concept.perspectives.places.map((pl, i) => (
+                          <span key={i} className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                            {pl.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 📜 年表 */}
+                  {concept.perspectives.timeline && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-purple-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        📜 関連略年表
+                      </h3>
+                      <div className="space-y-1.5 text-[12.5px]">
+                        {concept.perspectives.timeline.map((t, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <span className="font-mono text-purple-300 text-[11px] min-w-[65px]">{t.year}</span>
+                            <span className="text-stone-300 truncate">{t.event}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ---------------- L4: 全体年表ページ ---------------- */}
+        {page === "timeline" && (
+          <div className="rise space-y-6">
+            <div className="p-5 rounded-2xl bg-amber-500/[.05] ring-1 ring-amber-500/20">
+              <h2 className="text-xl font-bold text-white mb-1">昭和史 主要年表</h2>
+              <p className="text-[13.5px] text-stone-300">昭和改元から激動の戦争、復興、高度成長、昭和の終焉まで</p>
+            </div>
+            <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-amber-500/30">
+              {TIMELINE.map((item, idx) => (
+                <div key={idx} className="relative group flex items-start justify-between gap-4 p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] transition">
+                  <div className="absolute -left-[19px] top-5 w-2.5 h-2.5 rounded-full bg-amber-500 ring-4 ring-[#0c0a09]" />
+                  <div>
+                    <span className="font-mono text-[12px] font-bold text-amber-400 block mb-0.5">{item.year}</span>
+                    <h3 className="font-bold text-[15px] text-white">{item.title}</h3>
+                  </div>
+                  {item.conceptId && (
+                    <button onClick={() => goConcept(item.conceptId)} className="flex-shrink-0 px-3 py-1 rounded-lg text-[12px] font-semibold bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition border border-amber-500/30">
+                      詳細を見る
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
