@@ -20,10 +20,10 @@ SynapSchema（シナプスキーマ）は、知識を「概念ノード」と「
 
 ## サンプル
 
-- protein.html（タンパク質図鑑）
-- elements.html（元素図鑑）
-- greek-history.html（古代ギリシャ図鑑）
-- syouwa.html（昭和史図鑑）
+- [protein.html](examples/protein.html)（タンパク質図鑑）
+- [elements.html](examples/elements.html)（元素図鑑）
+- [greek-history.html](examples/greek-history.html)（古代ギリシャ図鑑）
+- [syouwa.html](examples/syouwa.html)（昭和史図鑑）
 
 ## MulmoClaude Showcase
 
