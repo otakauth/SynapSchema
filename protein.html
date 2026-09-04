@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分子生物学 知識図鑑 ─ タンパク質編</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { background:#090d16; }
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb { background:rgba(14, 165, 233, .3); border-radius:8px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  @keyframes rise { from { transform:translateY(6px); opacity:0; } to { transform:none; opacity:1; } }
+  .rise { animation:rise .18s ease both; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+/* ============================================================
+   SVG GRAPHICS & ICONS (タンパク質・生化学モチーフ)
+   ============================================================ */
+const SvgIcon = ({ type, className = "w-12 h-12" }) => {
+  switch (type) {
+    case "structure_cat": // 構造と基本単位（ペプチド鎖・折りたたみのイメージ）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(14, 165, 233, 0.05)"/>
+          <path d="M25 50 C 35 20, 45 80, 55 50 C 65 20, 75 80, 85 50" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" fill="none"/>
+          <circle cx="25" cy="50" r="5" fill="#38bdf8"/>
+          <circle cx="55" cy="50" r="5" fill="#38bdf8"/>
+          <circle cx="85" cy="50" r="5" fill="#38bdf8"/>
+        </svg>
+      );
+    case "function_cat": // 酵素・生体内機能（鍵と鍵穴・触媒作用）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(168, 85, 247, 0.05)"/>
+          <path d="M30 35 A25 25 0 1 0 70 35 L58 35 A13 13 0 1 1 42 35 Z" stroke="#a855f7" strokeWidth="2.5" fill="rgba(168, 85, 247, 0.2)"/>
+          <polygon points="50,20 58,32 42,32" stroke="#38bdf8" strokeWidth="2" fill="rgba(56, 189, 248, 0.4)"/>
+        </svg>
+      );
+    case "synthesis_cat": // 合成と分解（セントラルドグマ・リボソーム）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(34, 197, 94, 0.05)"/>
+          <rect x="25" y="40" width="50" height="25" rx="12" stroke="#22c55e" strokeWidth="2" fill="rgba(34, 197, 94, 0.15)"/>
+          <line x1="20" y1="72" x2="80" y2="72" stroke="#22c55e" strokeWidth="3" strokeDasharray="4 4"/>
+          <path d="M50 22 L50 38 M45 28 L50 22 L55 28" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      );
+    case "health_cat": // 栄養と人体（筋肉・代謝・健康）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(245, 158, 11, 0.05)"/>
+          <path d="M30 65 Q50 20 70 65" stroke="#f59e0b" strokeWidth="3" fill="none"/>
+          <path d="M20 50 Q50 80 80 50" stroke="#f59e0b" strokeWidth="2" fill="none" strokeDasharray="3 3"/>
+          <circle cx="50" cy="42" r="8" fill="#f59e0b"/>
+        </svg>
+      );
+    case "amino_acid": // アミノ酸モチーフ
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(56, 189, 248, 0.05)"/>
+          <circle cx="50" cy="50" r="10" fill="#38bdf8"/>
+          <line x1="50" y1="20" x2="50" y2="40" stroke="#38bdf8" strokeWidth="2.5"/>
+          <line x1="50" y1="60" x2="50" y2="80" stroke="#38bdf8" strokeWidth="2.5"/>
+          <line x1="20" y1="50" x2="40" y2="50" stroke="#38bdf8" strokeWidth="2.5"/>
+          <line x1="60" y1="50" x2="80" y2="50" stroke="#38bdf8" strokeWidth="2.5"/>
+        </svg>
+      );
+    case "folding": // 高次構造・フォールディング
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(56, 189, 248, 0.05)"/>
+          <path d="M30 30 C 70 30, 30 70, 70 70" stroke="#38bdf8" strokeWidth="3" fill="none"/>
+          <path d="M30 70 C 70 70, 30 30, 70 30" stroke="#0284c7" strokeWidth="2" fill="none"/>
+        </svg>
+      );
+    case "enzyme": // 酵素触媒
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(168, 85, 247, 0.05)"/>
+          <circle cx="50" cy="50" r="22" stroke="#a855f7" strokeWidth="2.5" fill="rgba(168, 85, 247, 0.2)"/>
+          <path d="M35 50 L45 60 L65 40" stroke="#c084fc" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      );
+    case "hemoglobin": // 搬送系（ヘモグロビン）
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(239, 68, 68, 0.05)"/>
+          <circle cx="38" cy="38" r="14" stroke="#ef4444" strokeWidth="2"/>
+          <circle cx="62" cy="38" r="14" stroke="#ef4444" strokeWidth="2"/>
+          <circle cx="38" cy="62" r="14" stroke="#ef4444" strokeWidth="2"/>
+          <circle cx="62" cy="62" r="14" stroke="#ef4444" strokeWidth="2"/>
+          <circle cx="50" cy="50" r="6" fill="#ef4444"/>
+        </svg>
+      );
+    case "translation": // 翻訳・リボソーム
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(34, 197, 94, 0.05)"/>
+          <ellipse cx="50" cy="40" rx="25" ry="15" stroke="#22c55e" strokeWidth="2" fill="rgba(34, 197, 94, 0.2)"/>
+          <ellipse cx="50" cy="62" rx="30" ry="18" stroke="#22c55e" strokeWidth="2" fill="rgba(34, 197, 94, 0.3)"/>
+        </svg>
+      );
+    case "nutrition": // 必須アミノ酸・栄養
+      return (
+        <svg viewBox="0 0 100 100" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" strokeOpacity="0.2" fill="rgba(245, 158, 11, 0.05)"/>
+          <polygon points="50,20 62,38 82,42 68,56 70,76 50,68 30,76 32,56 18,42 38,38" stroke="#f59e0b" strokeWidth="2" fill="rgba(245, 158, 11, 0.2)"/>
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+/* ============================================================
+   CATEGORIES (大カテゴリ：4軸)
+   ============================================================ */
+const CATEGORIES = [
+  { 
+    id: "structure", 
+    name: "構造と化学的性質", 
+    icon: "structure_cat",
+    description: "タンパク質の最小単位であるアミノ酸から、立体構造（1次〜4次構造）が形作られる基本原理。" 
+  },
+  { 
+    id: "function", 
+    name: "生体内での多様な機能", 
+    icon: "function_cat",
+    description: "化学反応を促進する「酵素」、酸素を運ぶ「搬送系」、身体を守る「抗体」など、生命活動を支える役割。" 
+  },
+  { 
+    id: "synthesis", 
+    name: "合成・品質管理・分解", 
+    icon: "synthesis_cat",
+    description: "DNAの遺伝情報からリボソームで生み出され、不要になったタンパク質が分解・リサイクルされる一生。" 
+  },
+  { 
+    id: "health", 
+    name: "栄養・代謝と人体", 
+    icon: "health_cat",
+    description: "食事からの摂取、必須アミノ酸の役割、筋肉合成や代謝におけるタンパク質の健康機能。" 
+  }
+];
+
+/* ============================================================
+   CONCEPTS (概念データ：9項目)
+   ============================================================ */
+const CONCEPTS = [
+  {
+    id: "amino_acids", cat: "structure", title: "アミノ酸（20種類の基本ピース）", icon: "amino_acid",
+    headline: "すべてのタンパク質を構成する、共通骨格と独自の側鎖を持つ分子",
+    summary: "タンパク質はアミノ基（-NH2）とカルボキシ基（-COOH）、そして独自の側鎖（R基）を持つ20種類のアミノ酸がペプチド結合で長鎖状に繋がったポリマーである。側鎖の親水性・疎水性・電荷の違いがタンパク質の性質を決定づける。",
+    perspectives: {
+      person: [
+        { label: "基本骨格", desc: "中心炭素（α炭素）、アミノ基、カルボキシ基、水素原子" },
+        { label: "可変部", desc: "側鎖（R基）：20種類ごとに固有の化学性質を持つ" },
+        { label: "高次構造", name: "タンパク質の立体構造（フォールディング）", targetId: "folding_struct" }
+      ],
+      era: [
+        { label: "分類", text: "疎水性アミノ酸、極性無電荷アミノ酸、酸性アミノ酸、塩基性アミノ酸" },
+        { label: "体質", text: "体内で合成できない「必須アミノ酸（9種）」と合成可能な「非必須アミノ酸（11種）」" }
+      ],
+      causality: [
+        { q: "なぜ20種類のアミノ酸だけで無数のタンパク質が作れるのか？", a: "数百〜数千個の配列パターン（20のn乗）の組み合わせが無限大に存在するため。" },
+        { q: "なぜ疎水性側鎖が構造形成に重要なのか？", a: "水分子を避けるように分子の内側に集まる力（疎水性相互作用）が、立体構造の主な原動力になるため。" }
+      ],
+      places: [
+        { name: "細胞質（遊離アミノ酸プール）" },
+        { name: "リボソーム（結合場所）", targetId: "translation_process" }
+      ],
+      timeline: [
+        { year: "ステップ1", event: "DNAの遺伝情報に基づき、特定のアミノ酸が選択される" },
+        { year: "ステップ2", event: "脱水縮合によりアミノ基とカルボキシ基が結合（ペプチド結合）" },
+        { year: "ステップ3", event: "長鎖ペプチド（一次構造）が完成する" }
+      ]
+    },
+    era: "構成単位 / 分子レベル"
+  },
+  {
+    id: "folding_struct", cat: "structure", title: "タンパク質の階層的立体構造", icon: "folding",
+    headline: "1次配列から4次構造へ ── 形が機能（働き）を決める",
+    summary: "アミノ酸の並び順（1次）が、水素結合によるαヘリックスやβシート（2次）を作り、側鎖の相互作用でコンパクトに折りたたまれ（3次）、複数のサブユニットが複合体（4次）を形成する。正確な立体構造をとることで初めて本来の機能を発揮する。",
+    perspectives: {
+      person: [
+        { label: "一次構造", desc: "アミノ酸のアミノ酸配列（ペプチド結合）" },
+        { label: "二次構造", desc: "αヘリックス（螺旋）、βシート（ひだ状構造）" },
+        { label: "三次構造", desc: "1本のポリペプチド鎖がとる完全な3次元立体構造" },
+        { label: "四次構造", name: "ヘモグロビン等の複数サブユニット複合体", targetId: "hemoglobin_func" }
+      ],
+      era: [
+        { label: "安定化要因", text: "疎水性相互作用、水素結合、イオン結合、ジスルフィド結合（S-S結合）" },
+        { label: "補助因子", name: "分子シャペロン（折りたたみを助けるタンパク質）", targetId: "folding_chaperone" }
+      ],
+      causality: [
+        { q: "熱や酸でタンパク質が変性するのはなぜ？", a: "加熱やpH変化によって、水素結合や疎水性相互作用などの弱い結合が切れ、立体構造が崩れてしまうため（熱変性）。" },
+        { q: "失活（機能喪失）はなぜ起きる？", a: "立体構造が崩れると、基質や受容体と結合する「活性部位」の形が失われるため。" }
+      ],
+      places: [
+        { name: "小胞体（膜・分泌タンパク質の折たたみ）" },
+        { name: "細胞質基質" }
+      ],
+      timeline: [
+        { year: "1次", event: "アミノ酸が直鎖状に重合（リボソーム）" },
+        { year: "2次", event: "主鎖の水素結合でローカルな二次構造が形成" },
+        { year: "3次", event: "側鎖間相互作用で全体の3D構造へ折りたたまれ" },
+        { year: "4次", event: "複数の単量体が会合して機能型複合体へ" }
+      ]
+    },
+    era: "構造形成フェーズ"
+  },
+  {
+    id: "enzyme_catalyst", cat: "function", title: "酵素（生体触媒）", icon: "enzyme",
+    headline: "生命の代謝反応を何百万倍にも加速させる精密なナビゲーター",
+    summary: "生体内のほぼすべての化学反応は「酵素」によって触媒される。酵素は特定のアミノ酸で構成される「活性部位」を持ち、特定の「基質」とだけ結合（基質特異性）して、反応に必要な活性化エネルギーを劇的に低下させる。",
+    perspectives: {
+      person: [
+        { label: "主要要素", desc: "アポ酵素（タンパク質部分）＋ 補酵素/金属イオン" },
+        { label: "ターゲット", desc: "基質（反応を受ける物質）" },
+        { label: "代表例", desc: "ペプシン（消化）、DNAポリメラーゼ（複製）、ATP合成酵素" }
+      ],
+      era: [
+        { label: "モデル", text: "鍵と鍵穴説 / 誘導適合モデル（結合時に構造が柔軟に変化）" },
+        { label: "阻害様式", text: "拮抗阻害（活性部位の奪い合い） / 非拮抗阻害（別部位結合による変形）" }
+      ],
+      causality: [
+        { q: "なぜ酵素には最適温度や最適pHがあるのか？", a: "酵素自体がタンパク質であるため、過度な熱や極端なpHでは変性して活性部位の形が変わってしまうため。" },
+        { q: "少量でなぜ大きな効果が出るのか？", a: "酵素自身は反応の前後で変化せず、何度も繰り返し触媒として再利用されるため。" }
+      ],
+      places: [
+        { name: "細胞質（代謝系）" },
+        { name: "ミトコンドリア（呼吸鎖・クエン酸回路）" },
+        { name: "消化管（消化酵素）" }
+      ],
+      timeline: [
+        { year: "段階1", event: "基質が酵素の「活性部位」に結合（酵素-基質複合体）" },
+        { year: "段階2", event: "活性化エネルギーが下がり化学反応が進行" },
+        { year: "段階3", event: "生成物が離脱し、酵素は元の状態に戻る" }
+      ]
+    },
+    era: "機能分類：代謝触媒"
+  },
+  {
+    id: "hemoglobin_func", cat: "function", title: "搬送・構造・受容体タンパク質", icon: "hemoglobin",
+    headline: "運搬、骨格形成、情報伝達 ── 万能な生体分子マシーン",
+    summary: "酵素以外にもタンパク質は多彩な役割を担う。ヘモグロビンは酸素を全身に運搬し、コラーゲンやアクチンは細胞や組織の構造を維持する。また、細胞膜上の受容体は外部のホルモンシグナルを細胞内に伝達する。",
+    perspectives: {
+      person: [
+        { label: "搬送系", name: "ヘモグロビン（酸素輸送）、アルブミン（脂質輸送）" },
+        { label: "構造系", desc: "コラーゲン（皮膚・骨）、ケラチン（髪・爪）、アクチン/ミオシン（筋肉）" },
+        { label: "防御系", name: "免疫グロブリン（抗体）" }
+      ],
+      era: [
+        { label: "アロステリック効果", text: "ヘモグロビンにおいて1つの酸素が結合すると他の部位の酸素結合能が高まる現象" }
+      ],
+      causality: [
+        { q: "なぜコラーゲンは強度が高いのか？", a: "3本のポリペプチド鎖が強いトリプルヘリックス（3重螺旋）構造を形成しているため。" },
+        { q: "抗体が異物だけを攻撃できる理由は？", a: "可変部のアミノ酸配列を組み合わせることで、無数の抗原の形にぴったり合う立体構造を作れるから。" }
+      ],
+      places: [
+        { name: "赤血球（ヘモグロビン）" },
+        { name: "細胞外基質（コラーゲン）" },
+        { name: "細胞膜（受容体・チャネル）" }
+      ],
+      timeline: [
+        { year: "呼吸時", event: "肺の過剰な酸素環境でヘモグロビンがO2と結合" },
+        { year: "循環時", event: "血流に乗り末梢組織へ移動" },
+        { year: "放出時", event: "酸素濃度の低い代謝組織でO2を離脱" }
+      ]
+    },
+    era: "機能分類：構造・輸送"
+  },
+  {
+    id: "translation_process", cat: "synthesis", title: "セントラルドグマと翻訳（タンパク質合成）", icon: "translation",
+    headline: "DNAの遺伝情報（mRNA）を読み解き、アミノ酸の鎖へと変換する",
+    summary: "遺伝情報は DNA → mRNA → タンパク質 の順に伝達される（セントラルドグマ）。核内で転写されたmRNAの塩基配列（コドン）を、細胞質のリボソームが読み取り、tRNAが対応するアミノ酸を運んできて繋ぎ合わせる（翻訳）。",
+    perspectives: {
+      person: [
+        { label: "鋳型", desc: "mRNA（メッセンジャーRNA）" },
+        { label: "工場", desc: "リボソーム（rRNA＋タンパク質）" },
+        { label: "運搬役", desc: "tRNA（転移RNA：アンチコドンを持つ）" },
+        { label: "基本単位", name: "アミノ酸", targetId: "amino_acids" }
+      ],
+      era: [
+        { label: "コード規則", text: "3つの塩基（コドン）が1つのアミノ酸に対応（例：AUG＝メチオニン/開始）" },
+        { label: "エネルギー", text: "GTP（グアノシン三リン酸）のエネルギーを消費して進行" }
+      ],
+      causality: [
+        { q: "なぜRNAという仲介役が必要なのか？", a: "貴重なマスターデータであるDNAを核内に保護したまま、細胞質で大量にタンパク質を複製するため。" }
+      ],
+      places: [
+        { name: "細胞核（転写）" },
+        { name: "細胞質 / 粗面小胞体（翻訳・リボソーム）" }
+      ],
+      timeline: [
+        { year: "1. 開始", event: "リボソームがmRNAの開始コドン（AUG）を認識" },
+        { year: "2. 伸長", event: "tRNAが順次アミノ酸を運びペプチド結合を形成" },
+        { year: "3. 終止", event: "終止コドンに達するとポリペプチド鎖が遊離" }
+      ]
+    },
+    era: "生命現象：合成プロセス"
+  },
+  {
+    id: "folding_chaperone", cat: "synthesis", title: "分子シャペロンと品質管理", icon: "folding",
+    headline: "異常な折たたみを防ぎ、正しい3D構造へと導く「介添え役」",
+    summary: "合成直後のペプチド鎖は疎水性部位が露出しており、凝集（ダマになること）しやすい。分子シャペロン（Hsp70など）は未成熟なタンパク質に結合して不適切な凝集を防ぎ、正しい立体構造への折りたたみをアシストする。",
+    perspectives: {
+      person: [
+        { label: "主役", desc: "分子シャペロン（HSP：熱ショックタンパク質ファミリー）" },
+        { label: "保護対象", name: "折りたたみ途中の未成熟タンパク質", targetId: "folding_struct" }
+      ],
+      era: [
+        { label: "ストレス応答", text: "熱や熱病で過熱した際、シャペロンが急増してタンパク質変性を防ぐ" },
+        { label: "疾患関連", text: "不溶性凝集体の蓄積（アルツハイマー病のアミロイドβ、プリオン病など）" }
+      ],
+      causality: [
+        { q: "なぜ熱ショックタンパク質（HSP）と呼ばれる？", a: "細胞が熱ストレスを受けた際に、変性タンパク質を修復するために発現量が急増することから発見されたため。" }
+      ],
+      places: [
+        { name: "小胞体（小胞体ストレス応答）" },
+        { name: "細胞質" }
+      ],
+      timeline: [
+        { year: "捕捉", event: "露呈した疎水性領域にシャペロンが結合" },
+        { year: "折たたみ", event: "ATPの加水分解エネルギーを使って保護空間を提供" },
+        { year: "放出", event: "正しい立体構造が完成したらシャペロンが離脱" }
+      ]
+    },
+    era: "生命現象：品質管理"
+  },
+  {
+    id: "ubiquitin_degradation", cat: "synthesis", title: "ユビキチン・プロテアソーム系（タンパク質の分解）", icon: "synthesis_cat",
+    headline: "不要・異常になったタンパク質に「目印」を付けてシュレッダーにかける",
+    summary: "役目を終えたタンパク質や変性した不良タンパク質は、「ユビキチン」という小さな分子が目印として連鎖状に付着（ユビキチン化）され、大型酵素複合体「プロテアソーム」に分解されてアミノ酸へとリサイクルされる。",
+    perspectives: {
+      person: [
+        { label: "目印", desc: "ユビキチン分子（76アミノ酸からなる小タンパク質）" },
+        { label: "分子シュレッダー", desc: "プロテアソーム（筒状のタンパク質分解酵素複合体）" },
+        { label: "分解産物", name: "オリゴペプチド・遊離アミノ酸", targetId: "amino_acids" }
+      ],
+      era: [
+        { label: "対比", text: "オートファジー（細胞内小器官を含めたバルク分解）と相補的に機能" },
+        { label: "ノーベル賞", text: "2004年 ノーベル化学賞授賞対象の重要発見" }
+      ],
+      causality: [
+        { q: "なぜ細胞はわざわざエネルギーを使ってタンパク質を分解するのか？", a: "壊れたタンパク質が細胞内に蓄積すると毒性を持つほか、アミノ酸を再利用して新しいタンパク質を作るため（動的平衡）。" }
+      ],
+      places: [
+        { name: "細胞質基質" },
+        { name: "細胞核" }
+      ],
+      timeline: [
+        { year: "1. 標識", event: "E1, E2, E3酵素群により標的タンパク質にユビキチン鎖が付加" },
+        { year: "2. 認識", event: "プロテアソームがポリユビキチン鎖を認識して取り込む" },
+        { year: "3. 切断", event: "ATPを使って展開され、ペプチド断片へと分解される" }
+      ]
+    },
+    era: "生命現象：代謝・リサイクル"
+  },
+  {
+    id: "essential_amino", cat: "health", title: "必須アミノ酸とアミノ酸スコア", icon: "nutrition",
+    headline: "体内で作れない9種のアミノ酸 ── バランス良い食事の指標",
+    summary: "20種類のアミノ酸のうち9種類（バリン、ロイシン、イソロイシン等）は体内で十分な量を合成できない「必須アミノ酸」であり、食事から摂る必要がある。食品中の必須アミノ酸バランスを数値化したものを「アミノ酸スコア」と呼ぶ。",
+    perspectives: {
+      person: [
+        { label: "BCAA（分岐鎖）", desc: "バリン、ロイシン、イソロイシン（筋肉代謝に重要）" },
+        { label: "その他必須9種", desc: "ライシン、メチオニン、フェニルアラニン、トレオニン、トリプトファン、ヒスチジン" },
+        { label: "供給源", desc: "肉・魚・卵・大豆（アミノ酸スコア100）" }
+      ],
+      era: [
+        { label: "桶の理論", text: "一番少ない必須アミノ酸のレベルに合わせてしかタンパク質が合成できない原則" }
+      ],
+      causality: [
+        { q: "なぜ「アミノ酸スコア100」の食品が推奨されるのか？", a: "9つの必須アミノ酸が全て必要量を満たしており、体内で無駄なくタンパク質合成に利用されるため。" },
+        { q: "穀物（米・小麦）と豆類（大豆）を組み合わせると良い理由は？", a: "米に不足するリシンを大豆が補い、相互補完でアミノ酸スコアが高まるため。" }
+      ],
+      places: [
+        { name: "小腸（消化・吸収）" },
+        { name: "肝臓（代謝・再合成）" }
+      ],
+      timeline: [
+        { year: "摂取", event: "食事由来のタンパク質を胃ペプシン・膵酵素で消化" },
+        { year: "吸収", event: "小腸からアミノ酸として吸収され血液中へ" },
+        { year: "利用", event: "肝臓や筋肉で新たな自体系タンパク質を合成" }
+      ]
+    },
+    era: "栄養・健康科学"
+  },
+  {
+    id: "muscle_metabolism", cat: "health", title: "筋肉合成とタンパク質代謝", icon: "health_cat",
+    headline: "合成（アナボリズム）と分解（カタボリズム）の「動的平衡」",
+    summary: "人体内のタンパク質は常に合成と分解を繰り返している。筋トレなどの運動刺激と十分なタンパク質・炭水化物の摂取により、筋タンパク質合成率が分解率を上回ることで、筋肉量の増加（筋肥大）が起こる。",
+    perspectives: {
+      person: [
+        { label: "シグナル分子", desc: "mTOR（アミノ酸やインスリンにより活性化する合成スイッチ）" },
+        { label: "主要成分", desc: "アクチン、ミオシン（筋収縮を担うフィラメント）" },
+        { label: "代謝主役", name: "BCAA（特にロイシンが合成スイッチを入れる）", targetId: "essential_amino" }
+      ],
+      era: [
+        { label: "超回復", text: "運動による微細損傷と休息・栄養補給により強固に再構築される現象" },
+        { label: "窒素収支", text: "摂取窒素（タンパク質）と排泄窒素のバランス" }
+      ],
+      causality: [
+        { q: "なぜ空腹時の激しい運動は筋肉を減らすのか？", a: "血中アミノ酸濃度が低いと、身体が自らの筋タンパク質を分解してエネルギーに変換しようとするため。" }
+      ],
+      places: [
+        { name: "骨格筋" },
+        { name: "血流（アミノ酸の輸送経路）" }
+      ],
+      timeline: [
+        { year: "1. 刺激", event: "筋トレにより筋繊維に機械的ストレスが掛かる" },
+        { year: "2. 補給", event: "タンパク質を摂取し血中アミノ酸濃度が高まる" },
+        { year: "3. 合成", event: "mTOR経路が起動し筋タンパク質合成が優位になる" }
+      ]
+    },
+    era: "生体代謝・運動生理"
+  }
+];
+
+const byId = (id) => CONCEPTS.find(c => c.id === id) || {
+  id, title: id, headline: "（詳細データ準備中）", summary: "順次追加予定です。", perspectives: null, icon: null
+};
+
+/* ============================================================
+   ROADMAP (セントラルドグマ〜ライフサイクル 全体マップ)
+   ============================================================ */
+const TIMELINE = [
+  { year: "STEP 1", title: "DNAの転写とmRNAの形成", conceptId: "translation_process" },
+  { year: "STEP 2", title: "リボソームでの「翻訳」とアミノ酸のペプチド結合", conceptId: "amino_acids" },
+  { year: "STEP 3", title: "ポリペプチドのフォールディング（立体構造形成）", conceptId: "folding_struct" },
+  { year: "STEP 4", title: "分子シャペロンによる品質管理・アシスト", conceptId: "folding_chaperone" },
+  { year: "STEP 5", title: "各種機能の発揮（酵素・搬送・構造タンパク質）", conceptId: "enzyme_catalyst" },
+  { year: "STEP 6", title: "ユビキチン化による不要タンパク質の標識", conceptId: "ubiquitin_degradation" },
+  { year: "STEP 7", title: "プロテアソームでの分解とアミノ酸リサイクル", conceptId: "ubiquitin_degradation" },
+  { year: "STEP 8", title: "食事からのアミノ酸補給と代謝・筋肉合成", conceptId: "essential_amino" }
+];
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+function App() {
+  const [page, setPage] = useState("home"); 
+  const [selectedCat, setSelectedCat] = useState(null);
+  const [selectedConcept, setSelectedConcept] = useState(null);
+
+  const concept = selectedConcept ? byId(selectedConcept) : null;
+
+  const goHome = () => { setPage("home"); setSelectedCat(null); setSelectedConcept(null); jump(); };
+  const goTimeline = () => { setPage("timeline"); jump(); };
+  const goCat = (id) => { setSelectedCat(id); setPage("cat"); setSelectedConcept(null); jump(); };
+  const goConcept = (id) => {
+    const c = byId(id);
+    setSelectedConcept(id);
+    if (c && c.cat) setSelectedCat(c.cat);
+    setPage("concept");
+    jump();
+  };
+
+  function jump() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+  const catObj = selectedCat ? CATEGORIES.find(c => c.id === selectedCat) : null;
+
+  return (
+    <div className="min-h-screen text-slate-100 selection:bg-sky-500/30"
+      style={{ background: "radial-gradient(1000px 480px at 12% -10%, rgba(14, 165, 233, .12), transparent 60%), #090d16" }}>
+      <div className="max-w-3xl mx-auto px-5 sm:px-8 py-9">
+
+        {/* ヘッダー領域 */}
+        <div className="mb-7 flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-[22px] font-bold tracking-tight text-white flex items-center gap-2 cursor-pointer" onClick={goHome}>
+              🧪 分子生物学 知識図鑑 ─ タンパク質編
+            </h1>
+            <p className="text-[13px] text-slate-400 mt-1">「構造・機能・合成・栄養」のメカニズムを「5つの視点」で読み解く</p>
+          </div>
+          <button onClick={goTimeline}
+            className={`px-4 py-2 rounded-xl text-[13px] font-bold ring-1 transition flex items-center gap-1.5 ${
+              page === "timeline"
+                ? "bg-sky-600 text-white ring-sky-400"
+                : "bg-sky-500/10 text-sky-300 ring-sky-500/30 hover:bg-sky-500/20"
+            }`}>
+            🗺️ 生命プロセス全景を見る
+          </button>
+        </div>
+
+        {/* パンくずリスト */}
+        <div className="flex items-center gap-2 text-[13px] text-slate-400 mb-8 flex-wrap">
+          <button onClick={goHome} className="hover:text-slate-200 transition">図鑑トップ</button>
+          {page === "timeline" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <span className="text-sky-400 font-semibold">生成〜分解のライフサイクルマップ</span>
+            </>
+          )}
+          {selectedCat && page !== "timeline" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <button onClick={() => goCat(selectedCat)} className="hover:text-slate-200 transition">
+                {catObj ? catObj.name : selectedCat}
+              </button>
+            </>
+          )}
+          {concept && page === "concept" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <span className="text-sky-400 font-semibold">{concept.title}</span>
+            </>
+          )}
+        </div>
+
+        {/* ---------------- L1: TOP カテゴリー一覧 ---------------- */}
+        {page === "home" && (
+          <div className="rise space-y-4">
+            <div className="text-[12px] font-bold text-slate-400 mb-1">カテゴリーを選択してください</div>
+            {CATEGORIES.map(cat => {
+              const count = CONCEPTS.filter(c => c.cat === cat.id).length;
+              return (
+                <div key={cat.id} onClick={() => goCat(cat.id)}
+                  className="group cursor-pointer rounded-xl p-5 bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] hover:ring-sky-500/40 transition flex items-center gap-5">
+                  <div className="flex-shrink-0 p-2 rounded-lg bg-slate-900/80 border border-white/5">
+                    <SvgIcon type={cat.icon} className="w-14 h-14" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <h2 className="text-[17px] font-bold text-white group-hover:text-sky-300 transition">{cat.name}</h2>
+                      <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300">{count} 項目</span>
+                    </div>
+                    <p className="text-[13.5px] text-slate-400 leading-relaxed">{cat.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ---------------- L2: カテゴリー内 概念リスト ---------------- */}
+        {page === "cat" && catObj && (
+          <div className="rise">
+            <div className="mb-6 p-5 rounded-2xl bg-sky-500/[.05] ring-1 ring-sky-500/20 flex items-center gap-4">
+              <SvgIcon type={catObj.icon} className="w-12 h-12 flex-shrink-0" />
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">{catObj.name}</h2>
+                <p className="text-[14px] text-slate-300 leading-relaxed">{catObj.description}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {CONCEPTS.filter(c => c.cat === selectedCat).map(c => (
+                <button key={c.id} onClick={() => goConcept(c.id)}
+                  className="w-full text-left rounded-xl p-4 bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] hover:ring-sky-500/40 transition flex items-center gap-4">
+                  <div className="flex-shrink-0 p-1.5 rounded-lg bg-slate-900/80 border border-white/5">
+                    <SvgIcon type={c.icon} className="w-10 h-10" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-[17px] text-white">{c.title}</div>
+                      <span className="text-[11px] text-slate-500 font-mono">{c.era}</span>
+                    </div>
+                    <div className="text-[13.5px] text-sky-300 mt-0.5 truncate">{c.headline}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- L3: 概念詳細ページ（5つの視点） ---------------- */}
+        {page === "concept" && concept && (
+          <div className="rise space-y-6">
+            <div className="flex items-start gap-5 p-5 rounded-2xl bg-white/[.03] ring-1 ring-white/10">
+              <div className="flex-shrink-0 p-3 rounded-xl bg-slate-900/90 border border-white/10">
+                <SvgIcon type={concept.icon} className="w-16 h-16" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between text-[12px] text-slate-400 mb-1">
+                  <span>{catObj ? catObj.name : ""}</span>
+                  <span className="font-mono text-sky-300">{concept.era}</span>
+                </div>
+                <h2 className="text-[28px] leading-tight font-bold text-white">{concept.title}</h2>
+                <p className="text-[15px] font-semibold text-sky-200 mt-1">{concept.headline}</p>
+                <p className="text-[14px] leading-relaxed text-slate-300 mt-3">{concept.summary}</p>
+              </div>
+            </div>
+
+            {concept.perspectives && (
+              <div className="space-y-4">
+                
+                {/* 1. 構成要素 & 2. 区分・分類 */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* 🧬 構成要素・関係分子 */}
+                  {concept.perspectives.person && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-sky-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        🧬 構成要素・主要分子
+                      </h3>
+                      <div className="space-y-2 text-[13px]">
+                        {concept.perspectives.person.map((p, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-slate-400 font-semibold min-w-[65px]">{p.label}:</span>
+                            {p.targetId ? (
+                              <button onClick={() => goConcept(p.targetId)} className="text-sky-300 underline hover:text-sky-100 text-left font-semibold">
+                                {p.name || p.desc}
+                              </button>
+                            ) : (
+                              <span className="text-slate-200">{p.desc || p.name}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 📊 分類・特性 */}
+                  {concept.perspectives.era && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-emerald-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        📊 分類・適用コンテキスト
+                      </h3>
+                      <div className="space-y-2 text-[13px]">
+                        {concept.perspectives.era.map((e, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-slate-400 font-semibold min-w-[65px]">{e.label}:</span>
+                            {e.targetId ? (
+                              <button onClick={() => goConcept(e.targetId)} className="text-emerald-300 underline hover:text-emerald-100 text-left">
+                                {e.text}
+                              </button>
+                            ) : (
+                              <span className="text-slate-200">{e.text}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. 因果・メカニズム */}
+                {concept.perspectives.causality && (
+                  <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                    <h3 className="text-amber-300 font-bold text-[14px] mb-3 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                      ⚙️ 因果・メカニズム（なぜ？どう機能する？）
+                    </h3>
+                    <div className="space-y-3 text-[13px]">
+                      {concept.perspectives.causality.map((c, i) => (
+                        <div key={i} className="border-l-2 border-amber-500/40 pl-3 space-y-0.5">
+                          <div className="font-semibold text-amber-200">Q. {c.q}</div>
+                          <div className="text-slate-300 leading-relaxed">{c.a}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. 作用部位 & 5. 反応・処理プロセス */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* 📍 存在・作用部位 */}
+                  {concept.perspectives.places && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-purple-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        📍 主な作用・反応の場
+                      </h3>
+                      <div className="flex flex-wrap gap-2 text-[12.5px]">
+                        {concept.perspectives.places.map((pl, i) => (
+                          <span key={i} className="px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                            {pl.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 🔄 反応・処理プロセス */}
+                  {concept.perspectives.timeline && (
+                    <div className="p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10">
+                      <h3 className="text-pink-300 font-bold text-[14px] mb-2.5 flex items-center gap-1.5 border-b border-white/10 pb-2">
+                        🔄 処理・反応プロセス
+                      </h3>
+                      <div className="space-y-1.5 text-[12.5px]">
+                        {concept.perspectives.timeline.map((t, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <span className="font-mono text-pink-300 text-[11px] min-w-[65px]">{t.year}</span>
+                            <span className="text-slate-300 truncate">{t.event}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ---------------- L4: 全体マップ・ロードマップ ---------------- */}
+        {page === "timeline" && (
+          <div className="rise space-y-6">
+            <div className="p-5 rounded-2xl bg-sky-500/[.05] ring-1 ring-sky-500/20">
+              <h2 className="text-xl font-bold text-white mb-1">タンパク質のライフサイクル全景マップ</h2>
+              <p className="text-[13.5px] text-slate-300">遺伝子からの合成、折りたたみ、機能発揮、そして分解と再利用まで</p>
+            </div>
+            <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-sky-500/30">
+              {TIMELINE.map((item, idx) => (
+                <div key={idx} className="relative group flex items-start justify-between gap-4 p-4 rounded-xl bg-white/[.03] ring-1 ring-white/10 hover:bg-white/[.06] transition">
+                  <div className="absolute -left-[19px] top-5 w-2.5 h-2.5 rounded-full bg-sky-400 ring-4 ring-[#090d16]" />
+                  <div>
+                    <span className="font-mono text-[12px] font-bold text-sky-400 block mb-0.5">{item.year}</span>
+                    <h3 className="font-bold text-[15px] text-white">{item.title}</h3>
+                  </div>
+                  {item.conceptId && (
+                    <button onClick={() => goConcept(item.conceptId)} className="flex-shrink-0 px-3 py-1 rounded-lg text-[12px] font-semibold bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 transition border border-sky-500/30">
+                      詳細を見る
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
