@@ -25,9 +25,18 @@ SynapSchema（シナプスキーマ）は、知識を「概念ノード」と「
 - greek-history.html（古代ギリシャ図鑑）
 - syouwa.html（昭和史図鑑）
 
+## MulmoClaude Showcase
+
+MulmoClaudeを使って作成した、歴史・地理を組み合わせた大規模なインタラクティブHTML図鑑です。
+
+SynapSchemaのサンプルとは別に、
+**MulmoClaudeを使うことで、ここまで大規模でインタラクティブな知識コンテンツを1つのHTMLとして生成できる**ことを示すショーケースとして公開しています。
+
+- [synapschema-history-geo-sample.html](MulmoClaude/synapschema-history-geo-sample.html)
+
 ## 使い方
 
-1. prompts/synapschema-prompt.md をAIに渡す
+1. prompts/synapschema-prompt.md およびelements.htmlをAIに渡す
 2. テーマを指定する
 3. SynapSchema形式のHTMLを生成する
 
