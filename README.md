@@ -33,6 +33,7 @@ SynapSchemaのサンプルとは別に、
 **MulmoClaudeを使うことで、ここまで大規模でインタラクティブな知識コンテンツを1つのHTMLとして生成できる**ことを示すショーケースとして公開しています。
 
 - [synapschema-history-geo-sample.html](MulmoClaude/synapschema-history-geo-sample.html)
+- [synapschema-eitango.html](MulmoClaude/synapschema-eitango.html)
 
 ## 使い方
 
