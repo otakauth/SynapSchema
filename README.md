@@ -32,7 +32,10 @@ MulmoClaudeを使って作成した、歴史・地理を組み合わせた大規
 SynapSchemaのサンプルとは別に、
 **MulmoClaudeを使うことで、ここまで大規模でインタラクティブな知識コンテンツを1つのHTMLとして生成できる**ことを示すショーケースとして公開しています。
 
+歴史・地理を組み合わせた大規模なインタラクティブHTML図鑑
 - [synapschema-history-geo-sample.html](MulmoClaude/synapschema-history-geo-sample.html)
+
+関連語と結び付けて多角的に学べるインタラクティブHTML英単語帳
 - [synapschema-eitango.html](MulmoClaude/synapschema-eitango.html)
 
 ## 使い方
