@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>古代ギリシャ知識図鑑</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { background:#0b0f1a; }
+  ::-webkit-scrollbar { width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb { background:rgba(148,163,184,.26); border-radius:8px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  @keyframes rise { from { transform:translateY(6px); opacity:0; } to { transform:none; opacity:1; } }
+  .rise { animation:rise .18s ease both; }
+  .vtext { writing-mode:vertical-rl; text-orientation:mixed; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ============================================================
+   CATEGORIES (大見出し・説明文つき)
+   ============================================================ */
+const CATEGORIES = [
+  { 
+    id: "polis", 
+    name: "ポリス（都市国家）", 
+    description: "エーゲ海沿岸に無数に生まれた独立都市。市民自らが政治と防衛を担う独特の社会システムシステムを形成した。" 
+  },
+  { 
+    id: "war", 
+    name: "大戦と覇権争い", 
+    description: "ペルシア帝国の侵攻に対する団結と、その後のアテネvsスパルタの同盟対立。ギリシャ世界全域を巻き込んだ激動期。" 
+  },
+  { 
+    id: "philo", 
+    name: "ギリシャ哲学の系譜", 
+    description: "神話から論理へ。「人間はどう生きるべきか」「世界は何でできているか」を問い直し、西洋思想の基盤を作った。" 
+  },
+  { 
+    id: "mac", 
+    name: "マケドニアの台頭", 
+    description: "内戦で疲弊したギリシャ諸ポリスを北方の王国マケドニアが制圧。強力な王権のもと世界帝国への道を切り開く。" 
+  },
+  { 
+    id: "hel", 
+    name: "ヘレニズムとローマ継承", 
+    description: "ギリシャ文化がオリエント（前線）へ伝播・融合。さらに後発のローマ帝国へと文明のバトンが受け継がれた。" 
+  }
+];
+
+/* ============================================================
+   CONCEPTS (詳細データ・図解キー・深掘り文章)
+   ============================================================ */
+const CONCEPTS = [
+  {
+    id: "athens", cat: "polis", title: "アテネ",
+    headline: "直接民主政と最強海軍で地中海を制した知識都市",
+    summary: "すべての市民（男性）が民会に参加して政治を決定する「直接民主政」を確立。ペルシア戦争後は三段櫂船を中心とする強力な海軍力を背景に「デロス同盟」の盟主となり、地中海貿易の富を集めて民主政と学問・芸術を黄金期へと導いた。",
+    visualization: "athens",
+    body: [
+      { label: "民会と直接民主政の仕組み", text: "抽選制や輪番制を採用し、家柄に関わらず全市民に政治参加の機会を与えた。ペリクレス時代に市民手当が導入され、貧困層も政治活動へ参加可能となった。" },
+      { label: "海軍力と無産市民の台頭", text: "三段櫂船の漕ぎ手として活躍した無産市民（貧しい市民）の発言権が強まり、これが民主政治の徹底へとつながった。" },
+      { label: "帝国化と対外強硬策", text: "デロス同盟の金庫をアテネに移し、アクロポリスのパルテノン神殿建設などに流用したことで、他ポリスからの反発を買うことになった。" }
+    ],
+    related: ["sparta", "persia", "pelop", "socrates"],
+    era: "BC 5世紀（黄金期）"
+  },
+  {
+    id: "sparta", cat: "polis", title: "スパルタ",
+    headline: "徹底した軍事教育と厳格な階級社会が生んだ陸上最強国家",
+    summary: "多数の被支配民（ヘイロータイ）を支配するため、全市民を戦士とする極端な軍事集中社会（リュクルゴス体制）を構築。7歳からの厳格な集団訓練（アゴーゲ）により、古代地中海世界で恐れられる最強の重装歩兵軍団を作り上げた。",
+    visualization: "sparta",
+    body: [
+      { label: "リュクルゴス体制と質素な暮らし", text: "貨幣の使用を制限し、金銭的欲望を排して軍事的連帯感を高めた。市民は平等を尊び「同等者」と呼ばれた。" },
+      { label: "ヘイロータイ（農奴）の存在", text: "市民の数十倍に及ぶ被支配農民が存在し、彼らの反乱を防ぐことがスパルタ軍事主義の最大の動機であった。" },
+      { label: "質実剛健と独自の女性観", text: "女性にも強い子供を産むための身体訓練が課され、アテネよりも高い社会的権利と財産所有権が認められていた。" }
+    ],
+    related: ["athens", "persia", "pelop"],
+    era: "BC 8世紀〜BC 4世紀"
+  },
+  {
+    id: "persia", cat: "war", title: "ペルシア戦争",
+    headline: "東方の超大国vsギリシャ都市連合 ─ 自由を守る防衛戦",
+    summary: "アケメネス朝ペルシア帝国の3度にわたるギリシャ侵攻に対し、アテネやスパルタなど主要ポリスが連合して立ち向かった戦争。マラトンの戦いやサラミスの海戦で勝利し、西欧文明の源流となるギリシャ都市国家の独立を守り抜いた。",
+    visualization: "persia",
+    body: [
+      { label: "イオニアの反乱が引き金", text: "小アジアのギリシャ系都市がペルシアに反乱を起こし、アテネがこれを支援したことが大帝国の怒りを買った。" },
+      { label: "サラミスの海戦（BC 480）", text: "テミストクレス率いるアテネ海軍が狭い海域へペルシア大艦隊を誘い込み、機動力で撃滅した運命の決戦。" },
+      { label: "西洋対東方という構造の誕生", text: "この勝利により「アジアの専制政治」対「ギリシャの自由な市民」という対立軸が形成され、のちの歴史観に強い影響を与えた。" }
+    ],
+    related: ["athens", "sparta", "pelop"],
+    era: "BC 499年 〜 BC 449年"
+  },
+  {
+    id: "pelop", cat: "war", title: "ペロポネソス戦争",
+    headline: "ギリシャ世界を分断した「アテネ同盟」vs「スパルタ同盟」の共倒れ内戦",
+    summary: "ペルシア戦争後、過剰に肥大化したアテネ帝国（デロス同盟）を警戒したスパルタ（ペロポネソス同盟）が起こした全ギリシャ的内戦。27年間の泥沼の戦いの末スパルタが勝利したが、全ポリスが疲弊し、ギリシャ衰退の要因となった。",
+    visualization: "pelop",
+    body: [
+      { label: "トゥキディデスの罠", text: "「台頭する新興勢力（アテネ）と、それを恐れる既存勢力（スパルタ）」という構造。現代の国際政治でも頻繁に引用される。" },
+      { label: "疫病とデマゴーグ（煽動政治家）", text: "ペリクレスの戦死後、アテネは衆愚政治に陥り、無理なシチリア遠征を強行して大敗した。" },
+      { label: "勝者なき終結", text: "スパルタが勝利して覇権を握ったが、統治能力を欠き、やがてテーベの台頭やマケドニアの侵攻を許すことになった。" }
+    ],
+    related: ["athens", "sparta", "persia", "alex"],
+    era: "BC 431年 〜 BC 404年"
+  },
+  {
+    id: "socrates", cat: "philo", title: "ソクラテス",
+    headline: "無知の知を掲げ、問いによって真理を探究した哲学の祖",
+    summary: "著書を残さず、アテネの街頭で人々に「美とは何か」「正義とは何か」を問い続けた。「自分は何も知らないということを知っている（無知の知）」を出発点とし、対話を通じて相手の矛盾を突く「助産術」で倫理的真理を追究した。",
+    visualization: "socrates",
+    body: [
+      { label: "ソフィスト批判", text: "弁論術を教えて金銭を得ていた弁士（ソフィスト）の相対主義を批判し、普遍的な絶対的真理の存在を主張した。" },
+      { label: "アテネ裁判と死刑判決", text: "「国家の神々を敬わず、青年を毒した」という濡れ衣を着せられ判決を受けるが、自らの信条を貫き毒杯を仰いだ。" },
+      { label: "「魂の世話」という思想", text: "富や名誉を求めることよりも、自らの魂（プシュケー）を良好な状態に保つことこそが人生の目的であるとした。" }
+    ],
+    related: ["plato", "athens"],
+    era: "BC 469年頃 〜 BC 399年"
+  },
+  {
+    id: "plato", cat: "philo", title: "プラトン",
+    headline: "現世を超えた真実の世界「イデア論」と理想国家を説く",
+    summary: "ソクラテスの処刑に衝撃を受け、現実に頼らない真理を追究。目に見える世界は影に過ぎず、真の実在は天上にある「イデア」であるとする理念論を展開。アカデメイア学園を創設し、哲学者こそが国を治めるべきだという「哲人政治」を唱えた。",
+    visualization: "plato",
+    body: [
+      { label: "洞窟の比喩", text: "人間は洞窟の壁に映る影を現実と思い込んでいる囚人のようなもの。真の実在（イデア）を見るために哲学が必要だと説明した。" },
+      { label: "『国家』と四つの徳", text: "国家と人間の魂を「理性・気概・欲望」に分類。それぞれに対応する「知恵・勇気・節制」が調和したときに「正義」が実現するとした。" },
+      { label: "アカデメイアの創設", text: "世界最古級の高等教育機関。数学や哲学を講義し、ヨーロッパ中の優秀な頭脳（アリストテレスなど）が集まった。" }
+    ],
+    related: ["socrates", "aris"],
+    era: "BC 427年頃 〜 BC 347年頃"
+  },
+  {
+    id: "aris", cat: "philo", title: "アリストテレス",
+    headline: "あらゆる学問の体系を構築した「万学の祖」",
+    summary: "プラトンの弟子。師の超越的なイデア論を批判し、個々の具体的な観察・実験を重んじる「経験主義」の立場をとる。論理学・物理学・生物学・政治学・倫理学など多岐にわたる学問分野を観察と分類によって初めて体系化した。",
+    visualization: "aris",
+    body: [
+      { label: "形質（モルフェ）と素材（ヒューレー）", text: "実在は「現実の形」と「材料」の結合によって存在すると考え、観察可能な自然界そのものを探究の対象とした。" },
+      { label: "中庸（メソテース）の倫理", text: "過剰と不足の両極端を避け、中間を選ぶことが美徳（例えば「無鉄砲」と「臆病」の間の「勇気」）であると説いた。" },
+      { label: "アレクサンドロスの家庭教師", text: "マケドニア王宮に招かれ、13歳のアレクサンドロスにギリシャ文学や自然科学、政治学を伝授した。" }
+    ],
+    related: ["plato", "alex"],
+    era: "BC 384年 〜 BC 322年"
+  },
+  {
+    id: "alex", cat: "mac", title: "アレクサンドロス大王",
+    headline: "ギリシャからインドまで──僅か12年で巨大帝国を打ち立てた不敗の征服王",
+    summary: "マケドニア王フィリッポス2世の子。父の志を継いで東方遠征を敢行し、宿敵ペルシア帝国を滅ぼしてインダス川流域まで到達。自らをアキレウスになぞらえ、戦術的天才として生涯不敗を誇る。ギリシャとオリエントが融合したヘレニズム時代の扉を開いた。",
+    visualization: "alex",
+    body: [
+      { label: "イッソス・ガウガメラの戦い", text: "ファランクス（重装歩兵集団）と精鋭騎兵を巧みに連動させ、常に数十万のペルシア大軍の「王（ダレイオス3世）」を直接狙い討ちにして全滅させた。" },
+      { label: "アレクサンドリア都市の建設と東西融合Policy", text: "征服地に自らの名を冠した都市を70以上建設。ペルシア人女性との集団結婚式を執り行うなど、民族融合による世界帝国を目指した。" },
+      { label: "早すぎる死と後継者戦争（ディアドコイ）", text: "バビロンにて32歳で急死。「最も強い者が継承せよ」と言い残したため、部下将軍たちによる帝国分裂戦争（ディアドコイ戦争）へと発展した。" }
+    ],
+    related: ["aris", "pelop", "hellen"],
+    era: "BC 356年 〜 BC 323年"
+  },
+  {
+    id: "hellen", cat: "hel", title: "ヘレニズム文化",
+    headline: "ポリスの枠を超えた「世界市民（コスモポリタン）」思想と個人の幸福追究",
+    summary: "アレクサンドロスの帝国建設によってギリシャ文化がオリエント全域へ普及。ポリスという安全基地を失った人々は「個人の心の安らぎ」を求め、ストア派やエピクロス派などの新しい哲学や、写実的でダイナミックな美術が花開いた。",
+    visualization: "hellen",
+    body: [
+      { label: "コイネー（共通ギリシャ語）の普及", text: "広大な地域でギリシャ語が共通言語となり、学者や商人の交流が劇的に活性化した。後の新約聖書もコイネーで書かれる。" },
+      { label: "ストア派とエピクロス派", text: "「禁欲主義（欲望の制御）」を解くストア派と、「隠れて生きよ（精神的快楽）」を求めるエピクロス派が台頭。個人主義哲学が盛んになる。" },
+      { label: "自然科学の黄金期とアレクサンドリア", text: "エジプトのアレクサンドリア王立研究所（ムセイオン）で、エウクレイデス（ユークリッド）やアルキメデス、エラトステネス（地球の周長計算）が活躍した。" }
+    ],
+    related: ["alex", "rome"],
+    era: "BC 323年（大王の死）〜 BC 30年"
+  },
+  {
+    id: "rome", cat: "hel", title: "ギリシャからローマへ",
+    headline: "軍事力で勝ったローマ、文化で負けたローマ ─ 西洋文明への継承",
+    summary: "地中海の新たな覇者となったローマ帝国はギリシャ諸国を武力で併合。しかしローマ人はギリシャの学問・哲学・芸術・建築を熱狂的に受容・模倣した。「征服されたギリシャは、野蛮な征服者を捕らえた」と評される文脈である。",
+    visualization: "rome",
+    body: [
+      { label: "ローマによる地中海統一", text: "BC 146年アテネ・コリントス降伏、BC 30年アクティウムの海戦でプトレマイオス朝エジプト滅亡。地中海全域がローマ領となる。" },
+      { label: "知識人と家庭教師としてのギリシャ人", text: "数多くのギリシャ文化人が奴隷や家庭教師としてローマ貴族に雇われ、ローマの青年たちに弁論術や哲学を教えた。" },
+      { label: "キリスト教と古代知の融合", text: "プラトンやアリストテレスの思考フレームは、後にキリスト教神学（中世スコラ学）へと組み込まれ、ヨーロッパ思想の骨格となった。" }
+    ],
+    related: ["hellen", "aris"],
+    era: "BC 2世紀 〜 AD 5世紀"
+  }
+];
+
+/* ============================================================
+   CHRONOLOGY (年表データ)
+   ============================================================ */
+const TIMELINE = [
+  { year: "BC 800頃", title: "ポリス（都市国家）の成立", conceptId: "athens" },
+  { year: "BC 500", title: "アテネ民主政の基礎確立", conceptId: "athens" },
+  { year: "BC 499-449", title: "ペルシア戦争（マラトン・サラミス）", conceptId: "persia" },
+  { year: "BC 469-399", title: "哲学者ソクラテスの時代", conceptId: "socrates" },
+  { year: "BC 431-404", title: "ペロポネソス戦争（全域内戦）", conceptId: "pelop" },
+  { year: "BC 387頃", title: "プラトンがアカデメイア創設", conceptId: "plato" },
+  { year: "BC 338", title: "マケドニアがギリシャ全域を支配", conceptId: "alex" },
+  { year: "BC 334-324", title: "アレクサンドロス大王の東方遠征", conceptId: "alex" },
+  { year: "BC 323", title: "大王の急死・ヘレニズム時代の開幕", conceptId: "hellen" },
+  { year: "BC 146", title: "ローマがギリシャ本土を自国領化", conceptId: "rome" },
+  { year: "BC 30", title: "プトレマイオス朝滅亡（古代ギリシャ終焉）", conceptId: "rome" }
+];
+
+const byId = (id) => CONCEPTS.find(c => c.id === id);
+
+/* ============================================================
+   FIGURES (直感的かつリッチなグラフィック図解)
+   ============================================================ */
+
+function FigAthens() {
+  return (
+    <figure className="space-y-4">
+      <p className="text-[15px] font-bold text-white">アテネの「民主政」と「海軍力」が連動するサイクル</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="p-3 rounded-lg bg-cyan-500/10 ring-1 ring-cyan-500/30 text-center">
+          <div className="text-[11px] text-cyan-300 font-bold">① 市民政治</div>
+          <div className="text-[13px] font-bold text-white mt-1">直接民主政</div>
+          <div className="text-[10.5px] text-slate-400 mt-1">無産市民の発言権強まる</div>
+        </div>
+        <div className="p-3 rounded-lg bg-blue-500/10 ring-1 ring-blue-500/30 text-center">
+          <div className="text-[11px] text-blue-300 font-bold">② 防衛軍備</div>
+          <div className="text-[13px] font-bold text-white mt-1">三段櫂船海軍</div>
+          <div className="text-[10.5px] text-slate-400 mt-1">貧困層が漕ぎ手として活躍</div>
+        </div>
+        <div className="p-3 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/30 text-center">
+          <div className="text-[11px] text-emerald-300 font-bold">③ 外交覇権</div>
+          <div className="text-[13px] font-bold text-white mt-1">デロス同盟</div>
+          <div className="text-[10.5px] text-slate-400 mt-1">同盟国から巨額献金を集約</div>
+        </div>
+        <div className="p-3 rounded-lg bg-amber-500/10 ring-1 ring-amber-500/30 text-center">
+          <div className="text-[11px] text-amber-300 font-bold">④ 文化黄金期</div>
+          <div className="text-[13px] font-bold text-white mt-1">学問・建築の隆盛</div>
+          <div className="text-[10.5px] text-slate-400 mt-1">パルテノン神殿・哲学</div>
+        </div>
+      </div>
+    </figure>
+  );
+}
+
+function FigAlex() {
+  return (
+    <figure className="space-y-5">
+      <p className="text-[15px] font-bold text-white">アレクサンドロス東方遠征の「破竹の進撃ルート」と構造</p>
+      
+      {/* ルートステップ */}
+      <div className="flex flex-col sm:flex-row items-stretch gap-2">
+        <div className="flex-1 p-3 rounded-xl bg-cyan-400/10 ring-1 ring-cyan-400/30 text-center">
+          <div className="text-[11px] font-bold text-cyan-300">起点</div>
+          <div className="text-[15px] font-bold text-white">マケドニア</div>
+          <div className="text-[11px] text-slate-400 mt-1">BC 334 出陣</div>
+        </div>
+        <div className="self-center text-slate-500">→</div>
+        <div className="flex-1 p-3 rounded-xl bg-amber-400/10 ring-1 ring-amber-400/30 text-center">
+          <div className="text-[11px] font-bold text-amber-300">大決戦</div>
+          <div className="text-[15px] font-bold text-white">イッソス / ガウガメラ</div>
+          <div className="text-[11px] text-slate-400 mt-1">ペルシア大帝国を破る</div>
+        </div>
+        <div className="self-center text-slate-500">→</div>
+        <div className="flex-1 p-3 rounded-xl bg-emerald-400/10 ring-1 ring-emerald-400/30 text-center">
+          <div className="text-[11px] font-bold text-emerald-300">最東端</div>
+          <div className="text-[15px] font-bold text-white">インダス川流域</div>
+          <div className="text-[11px] text-slate-400 mt-1">兵士の拒否で帰還決定</div>
+        </div>
+      </div>
+
+      {/* 勝利の理由と遺産 */}
+      <div className="grid sm:grid-cols-2 gap-3 text-[12.5px]">
+        <div className="p-3.5 rounded-xl bg-white/[.04] ring-1 ring-white/10">
+          <div className="font-bold text-cyan-300 mb-1">⚔️ 戦術の核心：王頭切り</div>
+          <p className="text-slate-300">ファランクス（槍ぶすま長槍兵）で敵の前衛を止め、自ら騎兵率いて敵王ダレイオス3世の本陣へ一直線に突撃した。</p>
+        </div>
+        <div className="p-3.5 rounded-xl bg-white/[.04] ring-1 ring-white/10">
+          <div className="font-bold text-rose-300 mb-1">🌏 歴史的インパクト：東西融合</div>
+          <p className="text-slate-300">ギリシャ文化とオリエント世界が合体し「ヘレニズム」が誕生。仏教美術（ガンダーラ美術）など世界中へ広がる。</p>
+        </div>
+      </div>
+    </figure>
+  );
+}
+
+function FigPhiloSequence() {
+  return (
+    <figure className="space-y-4">
+      <p className="text-[15px] font-bold text-white">ギリシャ哲学 思考の受け継がれ方（直系師弟関係）</p>
+      <div className="space-y-2">
+        {[
+          { name:"ソクラテス", role:"街頭の対話者", core:"「無知の知」─ 問いかけで概念を揺さぶる", color:"border-l-4 border-emerald-400 bg-emerald-400/[.05]" },
+          { name:"プラトン", role:"弟 子", core:"「イデア論」─ 天上に存在する完全な真理世界を追究", color:"border-l-4 border-cyan-400 bg-cyan-400/[.05]" },
+          { name:"アリストテレス", role:"孫弟子", core:"「経験主義」─ 地上の観察と分析で分類・学問化（万学の祖）", color:"border-l-4 border-amber-400 bg-amber-400/[.05]" },
+          { name:"アレクサンドロス", role:"教え子", core:"「世界帝国」─ 哲学と思想を剣とともに世界中へ広める", color:"border-l-4 border-rose-400 bg-rose-400/[.05]" },
+        ].map((item,i)=>(
+          <div key={i} className={`p-3 rounded-r-xl ring-1 ring-white/10 ${item.color} flex items-center justify-between`}>
+            <div>
+              <span className="text-[14px] font-bold text-white">{item.name}</span>
+              <span className="text-[11px] text-slate-400 ml-2">({item.role})</span>
+              <div className="text-[12px] text-slate-300 mt-0.5">{item.core}</div>
+            </div>
+            {i < 3 && <span className="text-slate-500 font-bold text-lg hidden sm:inline">↓</span>}
+          </div>
+        ))}
+      </div>
+    </figure>
+  );
+}
+
+function FigWarVs() {
+  return (
+    <figure className="space-y-4">
+      <p className="text-[15px] font-bold text-white">アテネ vs スパルタ 国家モデルの対立</p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div className="p-4 rounded-xl bg-cyan-500/10 ring-1 ring-cyan-500/30">
+          <div className="text-[14px] font-bold text-cyan-300 mb-2">🌊 アテネモデル（海洋国家）</div>
+          <ul className="text-[12px] text-slate-200 space-y-1.5">
+            <li>• <b>政治：</b> 直接民主政（市民全員による討議）</li>
+            <li>• <b>経済：</b> 海上貿易とデロス同盟の金銭集積</li>
+            <li>• <b>軍事：</b> 三段櫂船を中核とした巨大海軍</li>
+            <li>• <b>価値観：</b> 言論の自由、学問・芸術、個人の才能</li>
+          </ul>
+        </div>
+        <div className="p-4 rounded-xl bg-rose-500/10 ring-1 ring-rose-500/30">
+          <div className="text-[14px] font-bold text-rose-300 mb-2">🛡️ スパルタモデル（陸上軍事国家）</div>
+          <ul className="text-[12px] text-slate-200 space-y-1.5">
+            <li>• <b>政治：</b> 少数のスパルタ市民による軍事寡頭政</li>
+            <li>• <b>経済：</b> 農奴（ヘイロータイ）に耕作させる農業</li>
+            <li>• <b>軍事：</b> 最強のファランクス（重装歩兵集団）</li>
+            <li>• <b>価値観：</b> 規律、服従、質実剛健、過度な質素さ</li>
+          </ul>
+        </div>
+      </div>
+    </figure>
+  );
+}
+
+function FigHellenism() {
+  return (
+    <figure className="space-y-4">
+      <p className="text-[15px] font-bold text-white">「ヘレニズム文化」二つの要素の合流</p>
+      <div className="flex items-center gap-2">
+        <div className="flex-1 p-3 rounded-lg bg-cyan-500/10 ring-1 ring-cyan-500/30 text-center">
+          <div className="text-[13px] font-bold text-cyan-300">ギリシャ文化</div>
+          <div className="text-[11px] text-slate-400 mt-1">理性・人体美・民主思考</div>
+        </div>
+        <span className="text-xl font-bold text-slate-500">+</span>
+        <div className="flex-1 p-3 rounded-lg bg-amber-500/10 ring-1 ring-amber-500/30 text-center">
+          <div className="text-[13px] font-bold text-amber-300">オリエント文化</div>
+          <div className="text-[11px] text-slate-400 mt-1">専制王権・神秘主義・巨大造形</div>
+        </div>
+      </div>
+      <div className="text-center text-slate-500 font-bold">↓</div>
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-amber-500/20 ring-1 ring-white/20 text-center">
+        <div className="text-[15px] font-bold text-white">ヘレニズム文化の誕生</div>
+        <div className="text-[12px] text-slate-300 mt-1">「ミロのヴィーナス」「ラオコーン」、世界市民（コスモポリタン）意識の台頭</div>
+      </div>
+    </figure>
+  );
+}
+
+const FIGS = {
+  athens: FigAthens,
+  sparta: FigWarVs,
+  persia: FigWarVs,
+  pelop: FigWarVs,
+  socrates: FigPhiloSequence,
+  plato: FigPhiloSequence,
+  aris: FigPhiloSequence,
+  alex: FigAlex,
+  hellen: FigHellenism,
+  rome: FigHellenism
+};
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+function App() {
+  const [page, setPage] = useState("home"); // "home" | "cat" | "concept" | "timeline"
+  const [selectedCat, setSelectedCat] = useState(null);
+  const [selectedConcept, setSelectedConcept] = useState(null);
+  const [openBody, setOpenBody] = useState(false);
+
+  const concept = selectedConcept ? byId(selectedConcept) : null;
+
+  const goHome = () => { setPage("home"); setSelectedCat(null); setSelectedConcept(null); jump(); };
+  const goTimeline = () => { setPage("timeline"); jump(); };
+  const goCat = (id) => { setSelectedCat(id); setPage("cat"); setSelectedConcept(null); jump(); };
+  const goConcept = (id) => {
+    const c = byId(id);
+    if (!c) return;
+    setSelectedConcept(id);
+    setSelectedCat(c.cat);
+    setPage("concept");
+    setOpenBody(false);
+    jump();
+  };
+
+  function jump() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+  const catObj = selectedCat ? CATEGORIES.find(c => c.id === selectedCat) : null;
+  const Fig = concept ? FIGS[concept.visualization] : null;
+
+  return (
+    <div className="min-h-screen text-slate-100 selection:bg-cyan-500/30"
+      style={{ background: "radial-gradient(1000px 480px at 12% -10%, rgba(56,189,248,.07), transparent 60%), #0b0f1a" }}>
+      <div className="max-w-3xl mx-auto px-5 sm:px-8 py-9">
+
+        {/* ヘッダー領域 */}
+        <div className="mb-7 flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-[22px] font-bold tracking-tight text-white flex items-center gap-2">
+              🏛️ 古代ギリシャ知識図鑑
+            </h1>
+            <p className="text-[13px] text-slate-400 mt-1">歴史の概念をつないで、西洋文明の源流を対話的に探求する</p>
+          </div>
+          {/* 年表切り替えボタン */}
+          <button onClick={goTimeline}
+            className={`px-4 py-2 rounded-xl text-[13px] font-bold ring-1 transition flex items-center gap-1.5 ${
+              page === "timeline"
+                ? "bg-cyan-400 text-slate-950 ring-cyan-300"
+                : "bg-cyan-400/10 text-cyan-300 ring-cyan-400/30 hover:bg-cyan-400/20"
+            }`}>
+            📅 年表で全体を確認する
+          </button>
+        </div>
+
+        {/* パンくずリスト */}
+        <div className="flex items-center gap-2 text-[13px] text-slate-400 mb-8 flex-wrap">
+          <button onClick={goHome} className="hover:text-slate-200 transition">図鑑トップ</button>
+          {page === "timeline" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <span className="text-cyan-300 font-semibold">歴史年表ビュー</span>
+            </>
+          )}
+          {selectedCat && page !== "timeline" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <button onClick={() => goCat(selectedCat)} className="hover:text-slate-200 transition">
+                {catObj ? catObj.name : selectedCat}
+              </button>
+            </>
+          )}
+          {concept && page === "concept" && (
+            <>
+              <span className="text-slate-600">/</span>
+              <span className="text-cyan-300 font-semibold">{concept.title}</span>
+            </>
+          )}
+        </div>
+
+        {/* ---------------- L1: TOP カテゴリー一覧 ---------------- */}
+        {page === "home" && (
+          <div className="rise space-y-4">
+            <div className="text-[12px] font-bold text-slate-400 mb-1">大見出しカテゴリー一覧（クリックで詳細へ）</div>
+            {CATEGORIES.map(cat => {
+              const count = CONCEPTS.filter(c => c.cat === cat.id).length;
+              return (
+                <div key={cat.id} onClick={() => goCat(cat.id)}
+                  className="group cursor-pointer rounded-xl p-5 bg-white/[.04] ring-1 ring-white/10 hover:bg-white/[.07] hover:ring-cyan-400/40 transition">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <h2 className="text-[17px] font-bold text-white group-hover:text-cyan-300 transition">{cat.name}</h2>
+                    <span className="text-[12px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300">{count} 概念</span>
+                  </div>
+                  <p className="text-[13.5px] text-slate-400 leading-relaxed">{cat.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ---------------- L2: カテゴリー内 概念リスト ---------------- */}
+        {page === "cat" && catObj && (
+          <div className="rise">
+            <div className="mb-6 p-5 rounded-2xl bg-cyan-400/[.05] ring-1 ring-cyan-400/20">
+              <h2 className="text-2xl font-bold text-white mb-2">{catObj.name}</h2>
+              <p className="text-[14px] text-slate-300 leading-relaxed">{catObj.description}</p>
+            </div>
+            <div className="space-y-3">
+              {CONCEPTS.filter(c => c.cat === selectedCat).map(c => (
+                <button key={c.id} onClick={() => goConcept(c.id)}
+                  className="w-full text-left rounded-xl p-5 bg-white/[.04] ring-1 ring-white/10 hover:bg-white/[.07] hover:ring-cyan-400/40 transition">
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-[17px] text-white">{c.title}</div>
+                    <span className="text-[11px] text-slate-500 font-mono">{c.era}</span>
+                  </div>
+                  <div className="text-[14px] text-cyan-300 mt-1">{c.headline}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- L3: 概念詳細ページ（図解 + 根拠解説 + 関連リンク） ---------------- */}
+        {page === "concept" && concept && (
+          <div className="rise">
+            <div className="flex items-center justify-between text-[12px] text-slate-400 mb-1">
+              <span>{catObj ? catObj.name : ""}</span>
+              <span className="font-mono text-cyan-300">{concept.era}</span>
+            </div>
+            <h2 className="text-[30px] leading-tight font-bold mb-2 text-white">{concept.title}</h2>
+            <p className="text-[17px] leading-snug font-semibold text-cyan-200 mb-8">{concept.headline}</p>
+
+            {/* 図解コンポーネント */}
+            {Fig ? (
+              <div className="mb-8 p-5 rounded-2xl bg-white/[.03] ring-1 ring-white/12">
+                <Fig />
+              </div>
+            ) : (
+              <div className="mb-8 p-6 rounded-xl ring-1 ring-white/10 text-slate-400 text-[14px]">（図解準備中）</div>
+            )}
+
+            {/* 概要要約 */}
+            <p className="text-[14px] leading-[1.95] text-slate-300 mb-8">{concept.summary}</p>
+
+            {/* 関連概念チェーン */}
+            <div className="mb-8">
+              <div className="text-[12px] font-bold text-slate-400 mb-3 tracking-wide">関連する概念 ── たどって歴史の因果関係を歩く</div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="rounded-full px-3.5 py-1.5 text-[13px] font-bold bg-white/12 text-white ring-1 ring-white/20">
+                  {concept.title}
+                </span>
+                <span className="text-slate-500 text-[15px]">→</span>
+                {concept.related.map(relId => {
+                  const r = byId(relId);
+                  return (
+                    <button key={relId} onClick={() => goConcept(relId)}
+                      className="rounded-full px-3.5 py-1.5 text-[13px] font-semibold bg-cyan-400/15 text-cyan-100 ring-1 ring-cyan-400/40 hover:bg-cyan-400/25 transition">
+                      {r ? r.title : relId}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 深掘り折りたたみ（根拠と論点） */}
+            <div className="rounded-2xl bg-white/[.03] ring-1 ring-white/10 mb-8">
+              <button onClick={() => setOpenBody(o => !o)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/[.04] transition">
+                <span className="text-[14px] font-bold text-slate-200">🔍 もっと詳しく ── 歴史的背景と論点</span>
+                <span className="text-cyan-300 text-[13px] font-bold">{openBody ? "閉じる −" : "開く ＋"}</span>
+              </button>
+              {openBody && (
+                <div className="px-5 pb-6 pt-2 space-y-3 border-t border-white/10">
+                  {concept.body.map((b, i) => (
+                    <div key={i} className="rounded-xl bg-white/[.03] ring-1 ring-white/10 p-4">
+                      <div className="text-[13px] font-bold text-cyan-300 mb-1">{b.label}</div>
+                      <p className="text-[14px] leading-[1.85] text-slate-300">{b.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- 年表（TIMELINE）ページ ---------------- */}
+        {page === "timeline" && (
+          <div className="rise">
+            <h2 className="text-2xl font-bold mb-2 text-white">古代ギリシャ 歴史年表</h2>
+            <p className="text-[13px] text-slate-400 mb-7">出来事をクリックすると、関連する知識図鑑の概念ページへ移動します。</p>
+
+            <div className="relative border-l-2 border-cyan-500/30 ml-3 space-y-6">
+              {TIMELINE.map((item, idx) => {
+                const target = byId(item.conceptId);
+                return (
+                  <div key={idx} className="relative pl-6 group">
+                    {/* ドット */}
+                    <span className="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full bg-cyan-400 ring-4 ring-slate-950 group-hover:scale-125 transition" />
+                    <div className="text-[12px] font-mono font-bold text-cyan-400">{item.year}</div>
+                    <button onClick={() => goConcept(item.conceptId)}
+                      className="text-left mt-0.5 group-hover:translate-x-1 transition">
+                      <div className="text-[16px] font-bold text-white group-hover:text-cyan-300 transition">
+                        {item.title}
+                      </div>
+                      {target && (
+                        <div className="text-[12px] text-slate-400 mt-0.5">
+                          ↳ 解説ページ：<span className="text-slate-300 underline">{target.title}</span> （{target.headline}）
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
