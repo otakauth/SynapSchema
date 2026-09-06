@@ -39,7 +39,7 @@ SynapSchemaのサンプルとは別に、
 - [synapschema-eitango.html](MulmoClaude/synapschema-eitango.html)
 
 科学の繋がりを網羅的に学べるインタラクティブHTMLサイエンス図鑑
--
+-mulmoclaude/synapschema-science.html
 
 ## 使い方
 
