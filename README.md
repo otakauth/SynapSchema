@@ -35,11 +35,13 @@ SynapSchemaのサンプルとは別に、
 歴史・地理を組み合わせた大規模なインタラクティブHTML図鑑
 - [synapschema-history-geo-sample.html](MulmoClaude/synapschema-history-geo-sample.html)
 
+科学の繋がりを網羅的に学べるインタラクティブHTMLサイエンス図鑑
+-[mulmoclaude/synapschema-science.html](mulmoclaude/synapschema-science.html)
+
 関連語と結び付けて多角的に学べるインタラクティブHTML英単語帳
 - [synapschema-eitango.html](MulmoClaude/synapschema-eitango.html)
 
-科学の繋がりを網羅的に学べるインタラクティブHTMLサイエンス図鑑
--[mulmoclaude/synapschema-science.html](mulmoclaude/synapschema-science.html)
+
 
 ## 使い方
 
