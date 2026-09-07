@@ -42,7 +42,7 @@ SynapSchemaのサンプルとは別に、
 関連語と結び付けて多角的に学べるインタラクティブHTML英単語帳
 - [synapschema-eitango.html](MulmoClaude/synapschema-eitango.html)
 
-人文・社会・自然科学の繋がりを網羅的に巡るインタラクティブHTMLリベラルアーツ図鑑
+人文・社会系学問の繋がりを網羅的に巡るインタラクティブHTMLリベラルアーツ図鑑
 - [synapschema-history-geo-sample.html](mulmoclaude/synapschema-liberal-arts.html)
 
 ## 使い方
