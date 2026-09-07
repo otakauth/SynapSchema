@@ -43,7 +43,7 @@ SynapSchemaのサンプルとは別に、
 - [synapschema-eitango.html](MulmoClaude/synapschema-eitango.html)
 
 人文・社会系学問の繋がりを網羅的に巡るインタラクティブHTMLリベラルアーツ図鑑
-- [synapschema-history-geo-sample.html](mulmoclaude/synapschema-liberal-arts.html)
+- [synapschema-liberal-arts.html](mulmoclaude/synapschema-liberal-arts.html)
 
 ## 使い方
 
