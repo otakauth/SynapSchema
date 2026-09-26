@@ -37,10 +37,10 @@ SynapSchemaのサンプルとは別に、
 - [mulmoclaude/synapschema-science.html](mulmoclaude/synapschema-science.html)
 
 歴史・地理を組み合わせた大規模なインタラクティブHTML図鑑
-- [synapschema-history-geo-sample.html](MulmoClaude/synapschema-history-geo-sample.html)
+- [synapschema-history-geo-sample.html](mulmoClaude/synapschema-history-geo-sample.html)
 
 関連語と結び付けて多角的に学べるインタラクティブHTML英単語帳
-- [synapschema-eitango.html](MulmoClaude/synapschema-eitango.html)
+- [synapschema-eitango.html](mulmoClaude/synapschema-eitango.html)
 
 人文・社会系学問の繋がりを網羅的に巡るインタラクティブHTMLリベラルアーツ図鑑
 - [synapschema-liberal-arts.html](mulmoclaude/synapschema-liberal-arts.html)
