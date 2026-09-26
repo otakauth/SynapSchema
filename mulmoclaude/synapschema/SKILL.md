@@ -20,7 +20,7 @@ description: 「シナプスキーマ」— 知識を「概念ごとのカード
    - `data/skills/` があれば `data/skills/synapschema/` に置く。
    - なければ `.claude/skills/synapschema/` に置く。
 2. このフォルダの `SKILL.md`・`schema.json`・`views/`・`tools/` を、そのままそこへ写す（`README.md` と `samples/` は写さなくてよい）。
-3. `samples/*.json`（見本カード11枚）を1つの JSON 配列にまとめてワークスペース内に書き出し、
+3. `samples/*.json`（見本カード14枚。中身は理科の一般的な話）を1つの JSON 配列にまとめてワークスペース内に書き出し、
    `manageCollection` の `putItems`（`slug: "synapschema"`、`itemsFile` にその絶対パス、`mode: "create"`）で入れる。
 4. `presentCollection`（`collectionSlug: "synapschema"`）で図鑑を見せる。
 5. 最後に「どんなテーマの図鑑にするか」をたずねる。答えがあれば、下の「分類を変える」でテーマに合う分類（4〜8個）に作り直す。
@@ -80,7 +80,7 @@ description: 「シナプスキーマ」— 知識を「概念ごとのカード
 
 ユーザーが「見本を消して」と言ったら：
 
-- 見本カード11枚（`llm` `transformer` `ai-agent` `token-pricing` `gpu` `moores-law` `humanoid` `autonomous-driving-levels` `git` `dollar-cost-averaging` `inflation`）を `deleteItems` で消す。ただし、ユーザーが同じ id を使い、中身を書き換えたカードは消さない。
+- 見本カード14枚（`photosynthesis` `dna` `evolution` `black-hole` `solar-system` `big-bang` `gravity` `speed-of-light` `periodic-table` `atom` `heart` `immunity` `plate-tectonics` `earth-atmosphere`）を `deleteItems` で消す。ただし、ユーザーが同じ id を使い、中身を書き換えたカードは消さない。
 - `views/map.html` の中の、見本カードを指している次の部分を、取り込んだ内容に合わせて書き直すか空にする。
   - `GLOSSARY`（用語集。本文中の言葉にふきだしで説明が出る）
   - `CATEGORY_GUIDE`（分類ごとの読み物。`{{概念id}}` と書くとカードへのリンクになる）
@@ -93,7 +93,7 @@ description: 「シナプスキーマ」— 知識を「概念ごとのカード
 図解はデータではなく **画面のコード** に書く。
 
 1. `views/map.html` に、図を返す関数 `FigXxx` を書く。
-   - 使える部品：`Bars`（横棒グラフ）、`Steps`（段階）、`StatFlow`（数字の流れ）、`TwoBox`（2つの比較）、`ChipRow`（矢印でつないだ流れ）、`Timeline`（年表）、`Meter`、`StackBar`、`NoteBox`、`Svg`（SVG を直接書く）。
+   - 使える部品：`Bars`（横棒グラフ）、`Steps`（段階）、`StatFlow`（数字の流れ）、`TwoBox`（2つの比較）、`ChipRow`（矢印でつないだ流れ）、`Timeline`（年表）、`Meter`、`StackBar`、`CardGrid`（数字や要点のカード）、`NoteBox`、`Svg`（SVG を直接書く）。
    - 見本の `FigSample*` が書き方の例になる。
 2. `FIGS` に `"キー": FigXxx` を登録する。
 3. カードの `visualization` にそのキーを入れる（`mode: "merge"`）。

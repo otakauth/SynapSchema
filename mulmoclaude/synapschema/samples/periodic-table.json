@@ -1,0 +1,27 @@
+{
+  "id": "periodic-table",
+  "title": "周期表",
+  "category": "chem",
+  "headline": "すべての元素を、性質の似たものが縦にそろうよう並べた表",
+  "summary": "元素を軽い順に並べていくと、似た性質のものが一定の間かくで現れます。これを表にしたのが周期表で、今は118の元素が並んでいます。",
+  "body": [
+    {
+      "label": "空いたマスの予言",
+      "text": "メンデレーエフは、まだ見つかっていない元素のマスを空けておき、その性質まで言い当てました。",
+      "source": "2025-12-07",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "atom"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2025-12-07"
+    }
+  ],
+  "firstIssue": "2025-12-07",
+  "visualization": "sample-ptable"
+}

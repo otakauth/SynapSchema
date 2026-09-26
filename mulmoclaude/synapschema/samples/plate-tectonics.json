@@ -1,0 +1,27 @@
+{
+  "id": "plate-tectonics",
+  "title": "プレートテクトニクス",
+  "category": "earth",
+  "headline": "地球の表面は十数枚の岩の板に分かれ、ゆっくり動いている",
+  "summary": "地球の表面は、プレートと呼ばれる厚い岩の板でおおわれています。板は1年に数cmずつ動き、ぶつかる所で山や地震が生まれます。",
+  "body": [
+    {
+      "label": "大陸は動いてきた",
+      "text": "南アメリカとアフリカの海岸線がぴったり合いそうなのは、昔つながっていたからです。",
+      "source": "2025-10-26",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "earth-atmosphere"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2025-10-26"
+    }
+  ],
+  "firstIssue": "2025-10-26",
+  "visualization": "sample-plate"
+}

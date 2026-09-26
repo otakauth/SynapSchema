@@ -1,0 +1,39 @@
+{
+  "id": "evolution",
+  "title": "進化",
+  "category": "bio",
+  "headline": "世代を重ねるうちに、生き物の姿や性質が少しずつ変わること",
+  "summary": "子は親とそっくり同じではなく、少しずつちがいがあります。そのちがいのうち、暮らす場所に合ったものが生き残りやすく、何世代も重なって姿が変わっていきます。",
+  "body": [
+    {
+      "label": "ダーウィンの考え",
+      "text": "19世紀に、ダーウィンが「自然選択」という考えで進化のしくみを説明しました。",
+      "source": "2025-12-14",
+      "sourceType": "article"
+    },
+    {
+      "label": "今も起きている",
+      "text": "薬の効きにくい細菌が増えるのも、同じしくみです。薬で生き残ったものが増えていきます。",
+      "source": "2026-05-03",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "dna"
+    },
+    {
+      "concept": "photosynthesis"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2025-12-14"
+    },
+    {
+      "date": "2026-05-03"
+    }
+  ],
+  "firstIssue": "2025-12-14",
+  "visualization": "sample-evo"
+}

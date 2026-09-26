@@ -1,0 +1,33 @@
+{
+  "id": "atom",
+  "title": "原子のつくり",
+  "category": "chem",
+  "headline": "中心の原子核と、その周りの電子でできている",
+  "summary": "物はすべて原子でできています。原子の真ん中には小さく重い原子核があり、その周りを電子が取りまいています。",
+  "body": [
+    {
+      "label": "ほとんどすき間",
+      "text": "原子を東京ドームの大きさにすると、原子核はドームの真ん中に置いたビー玉くらいです。",
+      "source": "2026-02-22",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "periodic-table"
+    },
+    {
+      "concept": "photosynthesis"
+    },
+    {
+      "concept": "big-bang"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2026-02-22"
+    }
+  ],
+  "firstIssue": "2026-02-22",
+  "visualization": "sample-atom"
+}

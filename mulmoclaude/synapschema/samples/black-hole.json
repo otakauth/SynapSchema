@@ -1,0 +1,33 @@
+{
+  "id": "black-hole",
+  "title": "ブラックホール",
+  "category": "space",
+  "headline": "重力が強すぎて、光さえ抜け出せない天体",
+  "summary": "とても重い星が燃えつきてつぶれると、ばく大な重さが小さな場所に詰めこまれます。その周りでは重力が強すぎて、光も外へ出られません。",
+  "body": [
+    {
+      "label": "見えないのに見つかる",
+      "text": "周りのガスが吸いこまれるときに強く光るので、その光から場所が分かります。2019年には、ブラックホールの影を写した画像が発表されました。",
+      "source": "2026-01-25",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "gravity"
+    },
+    {
+      "concept": "speed-of-light"
+    },
+    {
+      "concept": "solar-system"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2026-01-25"
+    }
+  ],
+  "firstIssue": "2026-01-25",
+  "visualization": "sample-bh"
+}

@@ -32,7 +32,7 @@ mulmoclaude/synapschema/
   views/map.html      パソコン用の画面（図鑑の見た目と図解の描き方）
   views/map-mobile.html  スマホ用の画面
   tools/mkmobile.cjs  パソコン用の画面からスマホ用を作り直す道具
-  samples/            見本のカード 11枚
+  samples/            見本のカード 14枚（宇宙・物理・化学・生物・人体・地球）
   LICENSE             ライセンス（MIT-0）
 ```
 

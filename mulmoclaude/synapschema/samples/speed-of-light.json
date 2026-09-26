@@ -1,0 +1,30 @@
+{
+  "id": "speed-of-light",
+  "title": "光の速さ",
+  "category": "physics",
+  "headline": "1秒で約30万km。地球を7周半する速さ",
+  "summary": "光は、宇宙でいちばん速く進みます。太陽の光が地球に届くまでには、約8分20秒かかります。",
+  "body": [
+    {
+      "label": "遠くを見ることは、昔を見ること",
+      "text": "夜空の星の光は、何年も前、何万年も前に出た光です。",
+      "source": "2026-05-17",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "black-hole"
+    },
+    {
+      "concept": "big-bang"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2026-05-17"
+    }
+  ],
+  "firstIssue": "2026-05-17",
+  "visualization": "sample-light"
+}

@@ -1,0 +1,42 @@
+{
+  "id": "solar-system",
+  "title": "太陽系",
+  "category": "space",
+  "headline": "太陽と、そのまわりを回る8つの惑星などの集まり",
+  "summary": "太陽の周りを、水星・金星・地球・火星・木星・土星・天王星・海王星の8つの惑星が回っています。",
+  "body": [
+    {
+      "label": "内側と外側",
+      "text": "内側の4つは岩でできた小さな惑星、外側の4つはガスや氷でできた大きな惑星です。",
+      "source": "2025-10-05",
+      "sourceType": "article"
+    },
+    {
+      "label": "太陽がほとんど",
+      "text": "太陽系の重さの99%以上は、太陽ひとつが占めています。",
+      "source": "2026-03-29",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "gravity"
+    },
+    {
+      "concept": "black-hole"
+    },
+    {
+      "concept": "big-bang"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2025-10-05"
+    },
+    {
+      "date": "2026-03-29"
+    }
+  ],
+  "firstIssue": "2025-10-05",
+  "visualization": "sample-solar"
+}

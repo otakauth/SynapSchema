@@ -1,0 +1,30 @@
+{
+  "id": "earth-atmosphere",
+  "title": "地球の大気",
+  "category": "earth",
+  "headline": "地球をつつむ空気の層。窒素が約8割、酸素が約2割",
+  "summary": "大気は、宇宙から来る有害な光をさえぎり、昼と夜の温度差をやわらげて、生き物が暮らせる環境をつくっています。",
+  "body": [
+    {
+      "label": "酸素はあとから増えた",
+      "text": "今の酸素の多い空気は、光合成をする生き物がつくり出したものです。",
+      "source": "2026-09-06",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "photosynthesis"
+    },
+    {
+      "concept": "plate-tectonics"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2026-09-06"
+    }
+  ],
+  "firstIssue": "2026-09-06",
+  "visualization": "sample-air"
+}

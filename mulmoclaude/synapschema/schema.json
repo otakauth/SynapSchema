@@ -19,14 +19,12 @@
       "label": "カテゴリ",
       "required": true,
       "values": [
-        "ai-tech",
-        "ai-biz",
-        "chips",
-        "robotics",
-        "mobility",
-        "dev",
-        "macro",
-        "investment"
+        "space",
+        "physics",
+        "chem",
+        "bio",
+        "body",
+        "earth"
       ]
     },
     "headline": {

@@ -1,0 +1,42 @@
+{
+  "id": "dna",
+  "title": "DNA",
+  "category": "bio",
+  "headline": "生き物の体をつくる「設計図」が書かれた長い分子",
+  "summary": "DNA は、細胞の中にしまわれている、とても長いひも状の分子です。4種類の部品の並び順が、体をつくるための情報になっています。\n\n親から子へ受けつがれ、顔立ちや体質が似るのはこのためです。",
+  "body": [
+    {
+      "label": "二重らせん",
+      "text": "2本のひもが、はしごをねじったような形でからみ合っています。はしごの段は、決まった相手どうし（AとT、GとC）が組になってできています。",
+      "source": "2025-11-02",
+      "sourceType": "article"
+    },
+    {
+      "label": "写し取って増える",
+      "text": "細胞が分かれるとき、DNA はほどけて、それぞれを手本に同じものが写し取られます。",
+      "source": "2026-04-12",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "evolution"
+    },
+    {
+      "concept": "photosynthesis"
+    },
+    {
+      "concept": "immunity"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2025-11-02"
+    },
+    {
+      "date": "2026-04-12"
+    }
+  ],
+  "firstIssue": "2025-11-02",
+  "visualization": "sample-dna"
+}

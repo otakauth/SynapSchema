@@ -1,0 +1,30 @@
+{
+  "id": "big-bang",
+  "title": "ビッグバン",
+  "category": "space",
+  "headline": "宇宙は、約138億年前にとても熱く小さな状態から広がりはじめた",
+  "summary": "遠くの銀河ほど速く遠ざかっていることから、宇宙は今も広がっていると分かりました。時間を巻き戻すと、はじめは一点に近い熱い状態だったと考えられています。",
+  "body": [
+    {
+      "label": "宇宙に残る名残",
+      "text": "宇宙のあらゆる方向から届く弱い電波は、ビッグバンのころの熱の名残です。",
+      "source": "2026-03-08",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "solar-system"
+    },
+    {
+      "concept": "atom"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2026-03-08"
+    }
+  ],
+  "firstIssue": "2026-03-08",
+  "visualization": "sample-bigbang"
+}

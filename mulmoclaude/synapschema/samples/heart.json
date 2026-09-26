@@ -1,0 +1,27 @@
+{
+  "id": "heart",
+  "title": "心臓のしくみ",
+  "category": "body",
+  "headline": "1日に約10万回動いて、血液を全身へ送り出すポンプ",
+  "summary": "心臓は4つの部屋に分かれていて、肺で酸素を受け取った血液を全身へ、全身から戻った血液を肺へ送っています。",
+  "body": [
+    {
+      "label": "弁が逆流をふせぐ",
+      "text": "部屋の出入り口にある弁が、血液が逆向きに流れないようにしています。",
+      "source": "2026-07-05",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "immunity"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2026-07-05"
+    }
+  ],
+  "firstIssue": "2026-07-05",
+  "visualization": "sample-heart"
+}

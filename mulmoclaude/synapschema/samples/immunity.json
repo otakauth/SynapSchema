@@ -1,0 +1,30 @@
+{
+  "id": "immunity",
+  "title": "免疫",
+  "category": "body",
+  "headline": "体に入ってきた病原体を見分けて、追い出すしくみ",
+  "summary": "体には、細菌やウイルスなどの「よそ者」を見つけて退治する細胞がいます。一度戦った相手を覚えておき、次は素早く対応できます。",
+  "body": [
+    {
+      "label": "ワクチンのしくみ",
+      "text": "弱めた病原体や、その一部を先に見せておくことで、本番に備えて覚えさせます。",
+      "source": "2026-08-23",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "dna"
+    },
+    {
+      "concept": "heart"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2026-08-23"
+    }
+  ],
+  "firstIssue": "2026-08-23",
+  "visualization": "sample-immune"
+}

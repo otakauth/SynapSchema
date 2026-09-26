@@ -1,0 +1,30 @@
+{
+  "id": "gravity",
+  "title": "万有引力",
+  "category": "physics",
+  "headline": "重さのあるものどうしが、たがいに引き合う力",
+  "summary": "リンゴが落ちるのも、月が地球の周りを回るのも、同じ引き合う力のためです。ニュートンがこれを1つの法則にまとめました。",
+  "body": [
+    {
+      "label": "遠いほど弱い",
+      "text": "距離が2倍になると、引き合う力は4分の1になります。",
+      "source": "2025-11-16",
+      "sourceType": "article"
+    }
+  ],
+  "relatedTopics": [
+    {
+      "concept": "solar-system"
+    },
+    {
+      "concept": "black-hole"
+    }
+  ],
+  "sourceArticles": [
+    {
+      "date": "2025-11-16"
+    }
+  ],
+  "firstIssue": "2025-11-16",
+  "visualization": "sample-gravity"
+}
